@@ -110,7 +110,7 @@ class AuthChain:
     
 
 class SessionSecretModule:
-    implements(AuthModule)
+    implements(IAuthModule)
 
     def __init__(self,datasource):
         self.datasource = datasource
@@ -118,7 +118,7 @@ class SessionSecretModule:
 
     module_type = "authentication"
 
-    @defer.inlineCallback
+    @defer.inlineCallbacks
     def call(chain):
         if not "session_secret" in chain:
             return
@@ -135,11 +135,11 @@ class SessionSecretModule:
 
 
 class SessionStorageModule:
-    implements(AuthModule)
+    implements(IAuthModule)
 
     module_type = "session"
 
-    @defer.inlineCallback
+    @defer.inlineCallbacks
     def call(chain):
         # if we already have a session don't recreate it.
         if  "session_secret" in chain:
@@ -198,7 +198,7 @@ class BannedModule:
     implements(IAuthModule)
     module_type = "authentication"
     
-    @defer.inlineCallback
+    @defer.inlineCallbacks
     def call(self,chain):
         # we don't touch the data when the user might be logged in
         if "session_secret" in chain:
