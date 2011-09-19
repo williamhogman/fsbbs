@@ -47,6 +47,7 @@ class DiagFactory(Factory):
                 d =  chain.data
                 chain.data['failure'] = chain.failed
                 chain.data['success'] = chain.success
+                chain.data['uid'] = chain.uid
                 return d
                 
             self.service.getChain("diag").run(req,doAuth).addCallback(d.callback)

@@ -1,14 +1,13 @@
 
 from user import User
-from zope.interface import Interface,Attribute,implements
+from zope.interface import implements
 from twisted.internet import defer,reactor
 from twisted.python import randbytes,log
 from ..data import datasource
-class IAuthModule(Interface):
-    module_type = Attribute("""returns the type of the module. one of the PAM module types""")
+from .interface import IAuthModule
+#every module is responsible for calling addAuthModule
+from .modules import authModules
 
-    def call(chain):
-        """ call this auth module """
 
 
 class AuthHardFailure(Exception):
@@ -17,13 +16,23 @@ class AuthHardFailure(Exception):
         no chance of recovering """
 
 
+
+
+chains = {"default": ["BannedModule","SessionSecretModule","BasicUsername","DummyPasswords","SessionStorageModule"]}    
+    
+
 class AuthService:
     def __init__(self):
         pass
     
     def getChain(self,service):
         ac = AuthChain()
-        ac.modules = [BannedModule(),SessionSecretModule(datasource.getDatasource())]
+        ac.modules = list()
+
+        chainproto = chains[service] if service in chains else chains['default']
+        for mod  in chainproto:
+            ac.modules.append(authModules[mod]())
+
         return ac
         
 
@@ -126,121 +135,11 @@ class AuthChain:
         
     
 
-class SessionSecretModule:
-    implements(IAuthModule)
-
-    def __init__(self,datasource):
-        self .datasource = datasource
-
-
-    module_type = "authentication"
-
-    @defer.inlineCallbacks
-    def call(self,chain):
-        if not "session_secret" in chain:
-            return
-        uid = yield self.datasource.get("session:"+chain['session_secret'])
-        print("SessionSecret ",uid)
-        if uid is not None:
-            chain.uid = uid
-            sess_ip = yield self.datasource.get("session-ip:"+chain['session_secret'])
-
-            # session has been limited by ip
-            if sess_ip is not None and sess_ip != data['ipaddr']:
-                chain['attack-session-hijack'] = True
-                chain.failHard() # Session hijacking probably
-                return
-
-            chain._success = True
-
-
-
-class SessionStorageModule:
-    implements(IAuthModule)
-
-    module_type = "session"
-
-    @defer.inlineCallbacks
-    def call(chain):
-        # if we already have a session don't recreate it.
-        if  "session_secret" in chain:
-            return
-        # we need an UID before signing in
-        if chain.uid is None:
-            return
-
-        # twisted.python.randbytes is basically just an alias for os.urandom 
-        # it handles fallbacks etc and throws an exception if we don't have a
-        # secure random source
-        rand = twisted.python.randbytes.secureRandom(16)  
-        
-        session_secret = rand.encode("hex") # should probably use something more efficent than hex here...
-        
-        chain['set_session_secret'] = session_secret
-        self.datasource.set("session:"+session_secret,chain.uid)
-
-
-        # if an IP address has been specified in the chain
-        # set it in the data store
-        ipaddr = chain['ipaddr']
-        if ipaddr is not None:
-            self.datasource.set("session-ip:"+session_secret,ipaddr)
 
 
 
 
 
-class BannedModule:
-    """
-    This module provides banning for an ip address 
-    or a uesrname. It checks the  keys
-    banned_ip:$ip  and banned_user:$username
-
-    Note: this module is intended for blocking intrusion attempts not
-          ordinary abusive users, they are to be handled by putting
-          them in a group that doesn't have permission to post
-          IP address blocking should be avoided.
 
 
-    this does not check that the actual username exists.
-    The lack of username verification is intentional as 
-    this allows you to globally block login atempts for root or admin
 
-    Sets the following values on the chain
-    
-    hardFail: hardFail is called if a delay value under zero is found. 
-              This effectively blocks the authentication
-
-
-    delay: if it finds a value that is over zero it sets a delay that is 
-           by which the authentication process should be delayed
-
-    """
-    implements(IAuthModule)
-    module_type = "authentication"
-    
-    def __init__(self,block_ip=[],block_user=["root","admin"]):
-        self.block_ip = block_ip
-        self.block_user = block_user
-
-
-    def call(self,chain):
-
-        # we don't touch the data when the user might be logged in
-        if "session_secret" in chain:
-            pass
-
-        if "ipaddr" in chain:
-            if chain['ipaddr'] in self.block_ip:
-                chain.failHard()
-
-                
-        if "username" in chain:
-            #check against block list
-            if chain['username'] in self.block_user:
-                chain.failHard()
-
-
-        
-        ## passed our tests
-            
