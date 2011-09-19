@@ -2,7 +2,7 @@
 from user import User
 from zope.interface import Interface,Attribute,implements
 from twisted.internet import defer,reactor
-from twisted.python import randbytes
+from twisted.python import randbytes,log
 from ..data import datasource
 class IAuthModule(Interface):
     module_type = Attribute("""returns the type of the module. one of the PAM module types""")
@@ -17,6 +17,16 @@ class AuthHardFailure(Exception):
         no chance of recovering """
 
 
+class AuthService:
+    def __init__(self):
+        pass
+    
+    def getChain(self,service):
+        ac = AuthChain()
+        ac.modules = [BannedModule(),SessionSecretModule(datasource.getDatasource())]
+        return ac
+        
+
 class AuthChain:
     """ calls the authentication modules that are used"""
     def __init__(self):
@@ -24,7 +34,8 @@ class AuthChain:
         self._hardfailure = False
         self.uid = None
         self.modules = None
-
+        self._failure = False
+        self._success = False
 
 
     def __contains__(self,key):
@@ -40,17 +51,33 @@ class AuthChain:
         return self.data.__delitem__(key)
 
 
-    def run(self,data,cb=None):
+    def run(self,data,cb):
         self.data = data
         # create our defered
-        d = defer.Defered()
-        for module in self.modules:
-            d.addCallback(module.call,self)
-        def onDone(chain):
-            chain.done = True
-            return chain
-            
+        d = defer.Deferred()
+        
+        def moduleLog():
+            print("leaving {} success:{} failed:{} ".format(module,self._success,self.failed))
 
+        def callModule(arg,module):
+            print("entering {}".format(module))
+            d = defer.maybeDeferred(module.call,self)
+            d.addCallbacks(lambda arg: moduleLog())
+            return d
+
+        for module in self.modules:
+            d.addCallback(callModule,module)
+        def onDone(chain):
+            print("DONE!--")
+            self.done = True
+            return self
+
+
+
+        d.addCallback(onDone)
+        d.addCallback(cb)
+        d.addErrback(log.err)
+        d.callback(self)
         return d
         
         
@@ -72,13 +99,9 @@ class AuthChain:
         """
         if self.done and self._success and self.uid is not None and not self.failed:
             return True
+        return False
 
 
-    @success.setter
-    def success(self,value):
-        """ sets success to the passed in value unless we hardfailed """
-        if not self._hardfailure:
-            self._success = value
                 
 
     @property
@@ -93,12 +116,6 @@ class AuthChain:
         if we are done and successful we haven't failed, otherwise we failed.
         """
         return self._failure or self._hardfailure
-        if self._hardfailure:
-            return True
-        if self._failure:
-            return True 
-
-        return False
         
     
     @failed.setter
@@ -113,24 +130,28 @@ class SessionSecretModule:
     implements(IAuthModule)
 
     def __init__(self,datasource):
-        self.datasource = datasource
+        self .datasource = datasource
 
 
     module_type = "authentication"
 
     @defer.inlineCallbacks
-    def call(chain):
+    def call(self,chain):
         if not "session_secret" in chain:
             return
         uid = yield self.datasource.get("session:"+chain['session_secret'])
+        print("SessionSecret ",uid)
         if uid is not None:
             chain.uid = uid
             sess_ip = yield self.datasource.get("session-ip:"+chain['session_secret'])
+
             # session has been limited by ip
             if sess_ip is not None and sess_ip != data['ipaddr']:
+                chain['attack-session-hijack'] = True
                 chain.failHard() # Session hijacking probably
-            
-            chain.success = True
+                return
+
+            chain._success = True
 
 
 
@@ -198,18 +219,28 @@ class BannedModule:
     implements(IAuthModule)
     module_type = "authentication"
     
-    @defer.inlineCallbacks
+    def __init__(self,block_ip=[],block_user=["root","admin"]):
+        self.block_ip = block_ip
+        self.block_user = block_user
+
+
     def call(self,chain):
+
         # we don't touch the data when the user might be logged in
         if "session_secret" in chain:
-            return data
+            pass
 
         if "ipaddr" in chain:
-            #check against block list
-            pass
+            if chain['ipaddr'] in self.block_ip:
+                chain.failHard()
+
+                
         if "username" in chain:
             #check against block list
-            pass
+            if chain['username'] in self.block_user:
+                chain.failHard()
+
+
         
         ## passed our tests
             
