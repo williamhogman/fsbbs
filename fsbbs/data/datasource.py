@@ -20,6 +20,11 @@ class DataSource:
     def incr(self,key,am=1):
         return self.api.incr(key,am)
 
+    def zrange(self,key,start=0,stop=-1,withScore=False):
+        return self.api.zrange(key,start,stop,withScore)
+    
+    def zadd(self,key,score,value):
+        return self.api.zadd(key,score,value)
 
 dsf = DataSourceFactory()
 def getDatasource():
