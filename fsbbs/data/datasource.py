@@ -16,6 +16,9 @@ class DataSource:
 
     def set(self,key,value):
         return self.api.set(key,value)
+    
+    def incr(self,key,am=1):
+        return self.api.incr(key,am)
 
 
 dsf = DataSourceFactory()

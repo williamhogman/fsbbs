@@ -51,7 +51,7 @@ class SessionStorageModule:
         if  "session_secret" in chain:
             return
         # we need an UID before signing in and we need to have been successful atleast once
-        if chain.uid is None and chain._success:
+        if chain.uid is None or not chain._success:
             return
 
         # twisted.python.randbytes is basically just an alias for os.urandom 

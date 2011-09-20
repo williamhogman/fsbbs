@@ -18,7 +18,12 @@ class AuthHardFailure(Exception):
 
 
 
-chains = {"default": ["BannedModule","SessionSecretModule","BasicUsername","DummyPasswords","SessionStorageModule"]}    
+chains = {"default": ["BannedModule","SessionSecretModule",
+                      "BasicUsername","DummyPasswords","BasicPasswords","SessionStorageModule"],
+          "changepassword": ["SessionSecretModule","BasicUsername","BasicPasswords",
+                             "DummyPasswords","ChangeBasicPassword"],
+          "register": ["BasicUsername","RegisterUser","ChangeBasicPassword"]
+          }    
     
 
 class AuthService:
@@ -106,9 +111,8 @@ class AuthChain:
         """ Gets if we have been successful. we must also have decided on uid. 
             the auth process has to be done and successful. no unfixed failures
         """
-        if self.done and self._success and self.uid is not None and not self.failed:
-            return True
-        return False
+        return self.done and self._success and self.uid is not None and not self.failed
+
 
 
                 

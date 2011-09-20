@@ -25,14 +25,29 @@ class DummyPasswords():
         
 addAuthModule(DummyPasswords)
 
-class BasicPasswords():
+class BasicPasswordMixin:
+
+    def getSalt(self):
+        if self._salt is not None:
+            return defer.succeed(self._salt)
+        def cacheSalt(v):
+            self._salt = v
+            return v
+        d =  self.datasource.get("authmod:BasicPasswords:salt").addCallback(cacheSalt)
+        return d
+    
+    def passwordKey(self,uid):
+        return "user:{}:basic_pass".format(uid)
+
+
+class BasicPasswords(BasicPasswordMixin):
     implements(IAuthModule)
 
     module_type = "authentication"
     
     def __init__(self,ds=None):
         self.datasource = ds if ds is not None else datasource.getDatasource()
-        self.datasource.get("authmod:BasicPasswords:salt").addCallback(lambda val: self.salt = val)
+        self._salt = None
 
 
     @defer.inlineCallbacks
@@ -40,36 +55,52 @@ class BasicPasswords():
         if not "password" in chain or chain.uid is None:
             return
 
+
+
         pw = yield self.datasource.get("user:{}:basic_pass".format(chain.uid))
         
         if pw is None:
             return
 
-        h = hashlib.sha256(self.salt)
+        salt = yield self.getSalt()
+        h = hashlib.sha256(salt)
         h.update(chain['password'])
         
         
         if h.digest() == pw:
+            chain['valid_basicpassword'] = True
             chain._success = True
         
+
+addAuthModule(BasicPasswords)
+
         
+class ChangeBasicPassword(BasicPasswordMixin):
+    implements(IAuthModule)
+    module_type="password"
+    
+    def __init__(self,ds=None):
+        self.datasource = ds if ds is not None else datasource.getDatasource()
+        self._salt = None
+    @defer.inlineCallbacks
+    def call(self,chain):
+        if chain.failed or not chain._success or not 'new_password' in chain:
+            return
+        
+        salt = yield self.getSalt()
+
+        h = hashlib.sha256(salt)
+        h.update(chain['new_password'])
+        
+        yield self.datasource.set(self.passwordKey(chain.uid),h.digest())
         
 
-try:
-    import crack
-except ImportError:
-    print("we don't have python-crack (cracklib for python) won't load PasswordCrack")
-    print("pip install cracklib to install cracklib")
-    has_cracklib = False
-else:
-    has_cracklib = True
-
-if has_cracklib:
-    class PasswordCrack():
-        implements(IAuthModule)
-        
-        def call(self,chain):
+addAuthModule(ChangeBasicPassword)        
             
+
+        
+
+
             
 
 

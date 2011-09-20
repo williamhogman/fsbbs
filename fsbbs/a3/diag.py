@@ -31,27 +31,29 @@ class DiagProtocol(LineReceiver):
             name = line[:i].strip()
             val = line[i+1:].strip()
             self.bfr[name] = val
+
         
 class DiagFactory(Factory):
     protocol = DiagProtocol
 
     def request(self,req):
 
+        def formatOutput(chain):
+            chain.data['failure'] = chain.failed
+            chain.data['success'] = chain.success
+            chain.data['uid'] = chain.uid
+            return chain.data
+
+
         d = defer.Deferred()        
         if req['reqtype'].lower() == "echo":
             d.callback(req)
         elif req['reqtype'].lower() == "auth":
-            print("auth")
-            def doAuth(chain):
-                print("derp")
-                d =  chain.data
-                chain.data['failure'] = chain.failed
-                chain.data['success'] = chain.success
-                chain.data['uid'] = chain.uid
-                return d
-                
-            self.service.getChain("diag").run(req,doAuth).addCallback(d.callback)
-
+            self.service.getChain("diag").run(req,formatOutput).addCallback(d.callback)
+        elif req['reqtype'].lower() == "change":
+            self.service.getChain("changepassword").run(req,formatOutput).addCallback(d.callback)
+        elif req['reqtype'].lower() == "register":
+            self.service.getChain("register").run(req,formatOutput).addCallback(d.callback)
 
         return d
 
