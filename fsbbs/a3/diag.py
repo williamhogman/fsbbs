@@ -8,6 +8,7 @@ from twisted.protocols.basic import LineReceiver
 
 
 class DiagProtocol(LineReceiver):
+    """ Implements the diagnostics line protocol"""
     def writeResponse(self,response):
         self.sendLine("Response")
         for k,v in response.iteritems():
@@ -34,6 +35,7 @@ class DiagProtocol(LineReceiver):
 
         
 class DiagFactory(Factory):
+    """ stores the shared state for diag daemon and creates DiagProtocol instance for each connection """
     protocol = DiagProtocol
 
     def request(self,req):
