@@ -14,5 +14,3 @@ class User:
     def load(self,ds):
         self.ds = ds
         self.username = yield self.ds.get(self._key("username"))
-
-
