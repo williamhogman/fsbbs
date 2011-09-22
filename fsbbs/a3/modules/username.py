@@ -54,7 +54,7 @@ class RegisterUser:
             return
         
         
-         uid = yield self.datasource.incr("user:next_uid")
+        uid = yield self.datasource.incr("user:next_uid")
 
 
         username = chain['username']
