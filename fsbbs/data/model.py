@@ -1,6 +1,6 @@
 from twisted.internet import defer
-
-class Thing:
+import datasource 
+class Thing(object):
     """ Base class for all stored objects in the datastore that are not part of the auth system"""
 
     def _key(self,name):
@@ -32,12 +32,16 @@ class Thing:
             raise RuntimeError("Tried to access nonexiststant thing")
 
 
-    def __init__(self,ds,tid):
+    def __init__(self,tid,ds=None):
         self.datasource = ds
+        if self.datasource is None:
+            self.datasource = datasource.getDatasource()
+            
         # chain that defered onto our new one
         if tid > 0:
+            self.ready = defer.Deferred()
             self.update = True # changes will cause and update
-            self.ready = self.loadThing(tid).addCallback(self.ready.callback)
+            self.loadThing(tid).addCallback(self.ready.callback)
         else:
             self.update = False # changes will cause creation
             # we are already ready so make it a prefired deferred
@@ -46,12 +50,12 @@ class Thing:
 
 class Container(Thing):
     """ A think containing a sorted set of other things"""
-    def __init__(self,ds,tid):
-        super(Container,self).__init__(ds,tid)
+    def __init__(self,tid,ds=None):
+        super(Container,self).__init__(tid,ds)
         @defer.inlineCallbacks
         def onReady(a):
             self.contents = yield self.datasource.zrange(self._key("contents"))
-        self.ready.addCallback(onRead)
+        self.ready.addCallback(onReady)
         
     @defer.inlineCallbacks
     def add(self,thing,score=0):
@@ -60,9 +64,21 @@ class Container(Thing):
         yield self.datasource.zadd(self._key("contents"),score,thing)
 
 class Topic(Container):
-    def __init__(self,ds,tid):
-        super(Topic,self).__init__(ds,tid)
+    """ A topic is a list of post with one original post and poster"""
+    def __init__(self,tid,ds=None):
+        super(Topic,self).__init__(tid,ds)
+        @defer.inlineCallbacks
         def onReady(a):
             # the original post that started the topic
             self.original_post = yield self._get("original_post")
         self.ready.addCallback(onRead)
+
+class Post(Thing):
+    """ A post """
+    def __init__(self,tid,ds=None):
+        super(Post,self).__init__(tid,ds)
+        @defer.inlineCallbacks
+        def onReady(a):
+            self.poster_uid = yield self._get('poster_uid')
+            self.poster_name = yield self.datasource.get("user:{}:username".format(poster_uid))
+        
