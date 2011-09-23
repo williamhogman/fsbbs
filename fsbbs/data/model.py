@@ -1,5 +1,11 @@
 from twisted.internet import defer
 import datasource 
+
+
+class ThingNotFoundError(RuntimeError):
+    """ error to be raised when a thing cannot be found """
+
+
 class Thing(object):
     """ Base class for all stored objects in the datastore that are not part of the auth system"""
 
@@ -15,6 +21,9 @@ class Thing(object):
         return self.datasource.set(self._key(name))
         return self.datasource.set("thing:{}:{}".format(self.tid,name),val)
 
+    def __repr__(self):
+        return self.type
+
     def newThing(self,t=None):
         """ saves a new thing to the datastore"""
         self.tid = yield self.datasource.incr("thing:next_tid")
@@ -29,7 +38,7 @@ class Thing(object):
         self.tid = tid
         self.type = yield self._get("type")
         if self.type is None:
-            raise RuntimeError("Tried to access nonexiststant thing")
+            raise ThingNotFoundError("Tried to access nonexiststant thing")
 
 
     def __init__(self,tid,ds=None):
@@ -41,7 +50,7 @@ class Thing(object):
         if tid > 0:
             self.ready = defer.Deferred()
             self.update = True # changes will cause and update
-            self.loadThing(tid).addCallback(self.ready.callback)
+            self.loadThing(tid).chainDeferred(self.ready)
         else:
             self.update = False # changes will cause creation
             # we are already ready so make it a prefired deferred
@@ -49,7 +58,7 @@ class Thing(object):
 
 
 class Container(Thing):
-    """ A think containing a sorted set of other things"""
+    """ A thing containing a sorted set of other things"""
     def __init__(self,tid,ds=None):
         super(Container,self).__init__(tid,ds)
         @defer.inlineCallbacks
