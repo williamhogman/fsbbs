@@ -24,6 +24,15 @@ class Thing(object):
     def __repr__(self):
         return self.type
 
+    def asDict(self,bs=None):
+        d = {"id": self.tid,"type": self.type}
+        if bs is None:
+            return d
+        else:
+            bs.update(d)
+            return bs
+        
+
     def newThing(self,t=None):
         """ saves a new thing to the datastore"""
         self.tid = yield self.datasource.incr("thing:next_tid")
@@ -71,6 +80,15 @@ class Container(Thing):
         """ adds a pointer to the passed in thing"""
         self.contents.append(thing)
         yield self.datasource.zadd(self._key("contents"),score,thing)
+
+    def asDict(self,bs=None):
+        d = {"contents": self.contents }
+        super(Container,self).asDict(d)
+        if bs is None:
+            return d
+        else:
+            bs.update(d)
+            return bs
 
 class Topic(Container):
     """ A topic is a list of post with one original post and poster"""
