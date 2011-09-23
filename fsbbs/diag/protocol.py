@@ -2,24 +2,28 @@ from twisted.internet import defer
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import LineReceiver
 from zope.interface import Interface,Attribute,implements
+from socket import gethostname
 
 class DiagProtocol(LineReceiver):
     """ Implements the diagnostics line protocol"""
     def writeResponse(self,response):
         self.sendLine("Response")
-        for k,v in response.iteritems():
-            self.sendLine("{}: {}".format(k,v))
+        if hasattr(response,"iteritems"):
+            for k,v in response.iteritems():
+                self.sendLine("{}: {}".format(k,v))
+        else:
+            self.sendLine(str(response))
         self.bfr = None
         
 
     def connectionMade(self):
-        self.sendLine("Connected to {} on {}".format(self.factory.servicename,self.factory.hostname))
+        self.sendLine("Connected to {} on {}".format(self.factory.servicename,gethostname()))
 
     def lineReceived(self,line):
-
         if not hasattr(self,"bfr") or self.bfr is None:
             self.bfr = dict(reqtype=line.strip())
         elif line=="":
+
             # we dont wanna parse an empty request
             if len(self.bfr) > 0:
                 self.factory.request(self.bfr).addCallback(self.writeResponse)

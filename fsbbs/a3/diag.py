@@ -12,6 +12,7 @@ from ..diag import DiagProtocol,IDiagFactory
 class DiagFactory(Factory):
     """ stores the shared state for diag daemon and creates DiagProtocol instance for each connection """
     implements(IDiagFactory)
+    servicename = "fsbbs.a3"
 
     protocol = DiagProtocol
 
