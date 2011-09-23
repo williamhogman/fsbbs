@@ -25,7 +25,7 @@ class BBSService(object):
                     })
         
         defer.returnValue({
-                "main": mp
+                "main": mp.asDict()
                 })
 
 service = BBSService(datasource.getDatasource())
