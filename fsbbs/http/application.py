@@ -10,10 +10,19 @@ from twisted.internet import defer, reactor
 
 
 _handlers = list()
+
+def addHandler(path,handler):
+    """ 
+    adds a handler to the list of handlers to be added doesn't work affect instances of
+    application that have already been instansiated
+    """
+    _handlers.append((path,handler))
+
 def addHandlers(path,subhandlers):
     """ adds more than one handlers sharing an extensions such as index.html, index.json and so on """
     for ext,handler in subhandlers.iteritems():
-        _handlers.append(("/{}.{}".format(path,ext), handler))
+        addHandler("/{}.{}".format(path,ext), handler)
+
 
 
 
