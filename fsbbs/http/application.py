@@ -5,15 +5,24 @@ import cyclone.httpclient
 from twisted.python import log
 from twisted.internet import defer, reactor
 
-from .index import IndexHandler
+
 #from .things import ThingHandler
+
+
+_handlers = list()
+def addHandlers(path,subhandlers):
+    """ adds more than one handlers sharing an extensions such as index.html, index.json and so on """
+    for ext,handler in subhandlers.iteritems():
+        _handlers.append(("/{}.{}".format(path,ext), handler))
+
+
+
+import index
 
 class Application(cyclone.web.Application):
     def __init__(self):
-        handlers = [
-            (r"/", IndexHandler),
-#            (r"/([^/]+)/([^/]+)\.html",ThingHandler),
-        ]
+        handlers = _handlers
+
         settings = dict(
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
