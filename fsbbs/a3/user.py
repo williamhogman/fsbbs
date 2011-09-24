@@ -4,9 +4,9 @@ class User(object):
     def _key(self,name):
         return "user:{}:{}".format(self.uid,name)
     def __init__(self,uid,datasource):
-        if uid != 0:
+        if uid > 0:
             self.uid = uid
-            self.load(datasource)
+            self.ready = self.load(datasource)
 
 
     
