@@ -22,7 +22,8 @@ chains = {"default": ["BannedModule","SessionSecretModule",
                       "BasicUsername","DummyPasswords","BasicPasswords","SessionStorageModule"],
           "changepassword": ["SessionSecretModule","BasicUsername","BasicPasswords",
                              "DummyPasswords","ChangeBasicPassword"],
-          "register": ["BasicUsername","RegisterUser","ChangeBasicPassword"]
+          "register": ["BasicUsername","RegisterUser","ChangeBasicPassword"],
+          "session": ["SessionSecretModule"]
           }    
     
 
@@ -65,7 +66,7 @@ class AuthChain:
         return self.data.__delitem__(key)
 
 
-    def run(self,data,cb):
+    def run(self,data,cb=None):
         self.data = data
         # create our defered
         d = defer.Deferred()
@@ -89,7 +90,9 @@ class AuthChain:
 
 
         d.addCallback(onDone)
-        d.addCallback(cb)
+        if cb is not None:
+            d.addCallback(cb)
+
         d.addErrback(log.err)
         d.callback(self)
         return d
