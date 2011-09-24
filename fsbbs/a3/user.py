@@ -1,6 +1,6 @@
 from twisted.internet import defer
 
-class User:
+class User(object):
     def _key(self,name):
         return "user:{}:{}".format(self.uid,name)
     def __init__(self,uid,datasource):
