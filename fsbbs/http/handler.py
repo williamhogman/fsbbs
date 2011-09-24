@@ -13,6 +13,7 @@ class BaseHandler(cyclone.web.RequestHandler):
 
 
 class BaseDataHandler(BaseHandler):
+    mimetype = "application/octet-stream"
     """ Class for an HTTP request returning data thru a output handler """
     def getData(self):
         """
@@ -29,11 +30,13 @@ class BaseDataHandler(BaseHandler):
     @defer.inlineCallbacks
     def get(self):
         data = yield self.getData()
+        self.set_header("Content-Type",self.mimetype)
         self.formatOutput(data)
             
 
 
 class JSONDataHandler(BaseDataHandler):
+    mimetype = "application/json"
     """ BaseClass for json requests """
     def formatOutput(self,data):
         self.write(json_out.serialize(data))
@@ -41,6 +44,10 @@ class JSONDataHandler(BaseDataHandler):
 
 class MsgpackDataHandler(BaseDataHandler):
     """ BaseClass for msgpack requests """
+
+    # actually there is no specified mime type for msgpack
+    # the consensus seems to be to use x-msgpack this may change
+    mimetype = "application/x-msgpack"
     def formatOutput(self,data):
         self.write(msgpack_out.serialize(data))
 
@@ -80,3 +87,28 @@ def SimpleMsgpack(data_function):
     return inner
 
 
+from ..a3 import AuthService
+from ..a3.user import User
+from ..data import datasource
+class SessionAuthMixin(object):
+    """ mixin adding funcionality for easily verifying sessions """
+    @defer.inlineCallbacks
+    def verifySession(self):
+        authserv = AuthService()
+        session_cookie = self.get_cookie("s")
+        if session_cookie is None:
+            self.logged_in = False
+            defer.returnValue(False)
+        res = yield authserv.getChain("session").run({"session_secret": session_cookie})
+
+        self.logged_in = res.success
+        if self.logged_in:
+            self.user = User(res.uid,datasource.getDatasource())
+            yield self.user.ready
+
+        defer.returnValue(res.success)
+            
+
+            
+            
+        
