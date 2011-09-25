@@ -1,4 +1,5 @@
 from twisted.internet import defer
+from twisted.python import log
 import datasource 
 
 
@@ -24,13 +25,14 @@ class Thing(object):
     def __repr__(self):
         return self.type
 
+    @defer.inlineCallbacks
     def asDict(self,bs=None):
         d = {"id": self.tid,"type": self.type}
         if bs is None:
-            return d
+            defer.returnValue(d)
         else:
             bs.update(d)
-            return bs
+            defer.returnValue(bs)
         
 
     def newThing(self,t=None):
@@ -45,13 +47,17 @@ class Thing(object):
     @defer.inlineCallbacks
     def loadThing(self,tid):
         self.tid = tid
-        self.type = yield self._get("type")
+        # load it unless it hasn't been yet
+        if not hasattr(self,"type"):
+            self.type = yield self._get("type")
         if self.type is None:
             raise ThingNotFoundError("Tried to access nonexiststant thing")
 
 
-    def __init__(self,tid,ds=None):
+    def __init__(self,tid,ds=None,pretype=None):
         self.datasource = ds
+        if pretype is not None:
+            self.type = pretype
         if self.datasource is None:
             self.datasource = datasource.getDatasource()
             
@@ -68,8 +74,8 @@ class Thing(object):
 
 class Container(Thing):
     """ A thing containing a sorted set of other things"""
-    def __init__(self,tid,ds=None):
-        super(Container,self).__init__(tid,ds)
+    def __init__(self,tid,*args,**kwargs):
+        super(Container,self).__init__(tid,*args,**kwargs)
         @defer.inlineCallbacks
         def onReady(a):
             self.contents = yield self.datasource.zrange(self._key("contents"))
@@ -81,31 +87,80 @@ class Container(Thing):
         self.contents.append(thing)
         yield self.datasource.zadd(self._key("contents"),score,thing)
 
-    def asDict(self,bs=None):
-        d = {"contents": self.contents }
+    @defer.inlineCallbacks
+    def _contentsAsDict(self):
+        res = []
+        for tid in self.contents:
+            try:
+                ## yo dawg so i herd u liek async!
+                # get a thing 
+                thing = yield anythingFromId(tid,self.datasource)
+
+                # and wait till it is ready :o
+                yield thing.ready
+
+                # get as dict and wait for the thing
+                thing_dict = yield thing.asDict()
+
+            except ThingNotFoundError: 
+                # TODO: add built in monitoring of this and hook to clean up scripts
+                log.err()
+            else:
+                res.append(thing_dict)
+        defer.returnValue(res)
+        
+    @defer.inlineCallbacks
+    def asDict(self,bs=None,contentsParsed=False):
+        if contentsParsed:
+            
+            cnt = yield self._contentsAsDict()
+
+                
+            d = {"contents": cnt}
+        else:
+            d = {"contents": self.contents }
         super(Container,self).asDict(d)
         if bs is None:
-            return d
+            defer.returnValue(d)
         else:
             bs.update(d)
-            return bs
+            defer.returnValue(bs)
 
 class Topic(Container):
     """ A topic is a list of post with one original post and poster"""
-    def __init__(self,tid,ds=None):
-        super(Topic,self).__init__(tid,ds)
+    def __init__(self,tid,*args,**kwargs):
+        super(Topic,self).__init__(tid,*args,**kwargs)
         @defer.inlineCallbacks
         def onReady(a):
             # the original post that started the topic
             self.original_post = yield self._get("original_post")
-        self.ready.addCallback(onRead)
+        self.ready.addCallback(onReady)
 
 class Post(Thing):
     """ A post """
-    def __init__(self,tid,ds=None):
-        super(Post,self).__init__(tid,ds)
+    def __init__(self,tid,*args,**kwargs):
+        super(Post,self).__init__(tid,*args,**kwargs)
         @defer.inlineCallbacks
         def onReady(a):
             self.poster_uid = yield self._get('poster_uid')
             self.poster_name = yield self.datasource.get("user:{}:username".format(poster_uid))
+        self.ready.addCallback(onReady)
         
+
+type_to_class = {}
+
+# creating a mapping list between types in the db and our classes
+for cls in [Container,Topic,Post]:
+    type_to_class[cls.__name__.lower()] = cls
+
+
+@defer.inlineCallbacks
+def anythingFromId(tid,ds):
+    tp = yield ds.get("thing:{}:type".format(tid))
+    if tp is None:
+        raise ThingNotFoundError
+    elif not tp in type_to_class:
+        raise RuntimeError("no class fitting type {}".format(tp))
+    # load it from the datastore and save one db get with pretype
+    defer.returnValue(type_to_class[tp](tid,ds=ds,pretype=tp))
+     
