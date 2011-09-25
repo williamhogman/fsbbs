@@ -1,0 +1,11 @@
+{% extends "page.html" %}
+{% block title%}Main page{% endblock %}
+{% block content %}
+<div class="listing">
+  {% for item in main.contents %}
+  <div class="item">
+    <a href="/thing/{{item}}.html">{{item}}</a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
