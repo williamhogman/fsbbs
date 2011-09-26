@@ -104,7 +104,7 @@ class Container(Thing):
 
             except ThingNotFoundError: 
                 # TODO: add built in monitoring of this and hook to clean up scripts
-                log.err()
+                log.msg("{} was not found in {}".format(tid,self.tid))
             else:
                 res.append(thing_dict)
         defer.returnValue(res)
@@ -121,9 +121,12 @@ class Container(Thing):
             d = {"contents": self.contents }
         super(Container,self).asDict(d)
         if bs is None:
+            log.msg("bs was none")
             defer.returnValue(d)
         else:
+            print("MARK_D",bs)
             bs.update(d)
+
             defer.returnValue(bs)
 
 class Topic(Container):
@@ -134,7 +137,20 @@ class Topic(Container):
         def onReady(a):
             # the original post that started the topic
             self.original_post = yield self._get("original_post")
+            self.title = yield self._get("title")
         self.ready.addCallback(onReady)
+        
+    @defer.inlineCallbacks
+    def asDict(self,bs=None,contentsParsed=False):
+        d = {"title": self.title}
+        s = yield super(Topic,self).asDict(bs=d,contentsParsed=contentsParsed)
+        d.update(s)
+        if bs is None:
+            defer.returnValue(d)
+        else:
+            bs.update(d)
+            defer.returnValue(bs)
+
 
 class Post(Thing):
     """ A post """
@@ -147,10 +163,34 @@ class Post(Thing):
         self.ready.addCallback(onReady)
         
 
+class Forum(Container):
+    def __init__(self,*args,**kwargs):
+        super(Forum,self).__init__(*args,**kwargs)
+        @defer.inlineCallbacks
+        def onReady(a):
+            self.name = yield self._get('name')
+            self.tagline = yield self._get('tagline')
+        self.ready.addCallback(onReady)
+    
+    @defer.inlineCallbacks
+    def asDict(self,bs=None,contentsParsed=False,minimal=False):
+        d = {"name": self.name,"tagline": self.tagline }
+        if not minimal:
+            s = yield super(Forum,self).asDict(bs=d,contentsParsed=contentsParsed)
+            d.update(s)
+
+        if bs is None:
+            defer.returnValue(d)
+        else:
+            bs.update(d)
+            defer.returnValue(bs)
+
+
+
 type_to_class = {}
 
 # creating a mapping list between types in the db and our classes
-for cls in [Container,Topic,Post]:
+for cls in [Container,Topic,Post,Forum]:
     type_to_class[cls.__name__.lower()] = cls
 
 
