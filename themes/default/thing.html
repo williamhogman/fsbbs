@@ -1,0 +1,17 @@
+{% extends "page.html" %}
+{% block title %}{{thing.name or thing.title}}{% endblock %}
+
+{% block content %}
+<article class="thing thing-{{thing.type}}">
+  <header>
+  <a href="/t/{{thing.id}}.html" rel="self"><h2>{{thing.name or thing.title | e}}</h2></a>
+  {{thing}}
+  </header>
+  {% if thing.contents is defined %}
+  {% for sub in thing.contents %}
+  <section>
+  </section>
+  {% endfor %}
+  {% endif %}
+</article>
+{% endblock %}

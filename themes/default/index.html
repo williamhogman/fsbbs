@@ -1,11 +1,13 @@
 {% extends "page.html" %}
 {% block title%}Main page{% endblock %}
 {% block content %}
-<div class="listing">
+<nav class="listing">
+  <ul>
   {% for item in main.contents %}
-  <div class="item">
-    <a href="/thing/{{item}}.html">{{item}}</a>
-  </div>
+  <li>
+    <a data-type="{{item.type}}" href="/t/{{item.id}}.html">{{item.title}}</a>
+  </li>
   {% endfor %}
-</div>
+  </ul>
+</ul>
 {% endblock %}

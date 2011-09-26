@@ -12,7 +12,9 @@ class IndexHandler(BaseHandler,SessionAuthMixin):
 
         fp = yield service.getFrontpage()
         upd = {"user": self.user, "logged_in":self.logged_in} if (yield ses_ver) else {"user": self.logged_in}
-        fp.update(upd)    
+        fp.update(upd)
+        upd = yield service.getBasicInfo()
+        fp.update(upd)
         html.OutputFormatter.dump("index.html",fp,self)
         
         

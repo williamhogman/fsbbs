@@ -1,7 +1,7 @@
 from jinja2 import Environment, FileSystemLoader
 
 #from .markdown import markdownToHTML
-
+from ...service import service
 
 class HTMLOutputFormatter:
     """ processes dict objects and uses a template to format them as HTML """

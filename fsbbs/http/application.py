@@ -27,7 +27,7 @@ def addHandlers(path,subhandlers):
 
 
 import index
-
+import thing
 class Application(cyclone.web.Application):
     def __init__(self):
         handlers = _handlers
