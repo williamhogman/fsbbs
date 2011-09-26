@@ -124,7 +124,6 @@ class Container(Thing):
             log.msg("bs was none")
             defer.returnValue(d)
         else:
-            print("MARK_D",bs)
             bs.update(d)
 
             defer.returnValue(bs)
