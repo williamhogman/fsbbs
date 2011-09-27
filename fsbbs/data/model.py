@@ -25,14 +25,18 @@ class Thing(object):
     def __repr__(self):
         return self.type
 
-    @defer.inlineCallbacks
-    def asDict(self,bs=None):
+    def asDict(self,bs=None,**kwargs):
+        """ 
+        returns a deferred called when the dict has been created. this function is blocking
+        and not async but it doesn't matter because it just reads from memory
+        """
         d = {"id": self.tid,"type": self.type}
         if bs is None:
             defer.returnValue(d)
+            return defer.succeed(d)
         else:
             bs.update(d)
-            defer.returnValue(bs)
+            return defer.succeed(bs)
         
 
     def newThing(self,t=None):
@@ -87,34 +91,64 @@ class Container(Thing):
         self.contents.append(thing)
         yield self.datasource.zadd(self._key("contents"),score,thing)
 
-    @defer.inlineCallbacks
-    def _contentsAsDict(self):
-        res = []
+    def get_contents(self):
+        defs = list()
         for tid in self.contents:
-            try:
-                ## yo dawg so i herd u liek async!
-                # get a thing 
-                thing = yield anythingFromId(tid,self.datasource)
+            ## yo dawg so i herd u liek async!
+            # get a thing 
+            
+            d = anythingFromId(tid,self.datasource,ready=True)
 
-                # and wait till it is ready :o
-                yield thing.ready
+            def onError(err):
+                log.msg("Thing {} not found in {}".format(tid,self.tid))
+                return False
 
-                # get as dict and wait for the thing
-                thing_dict = yield thing.asDict()
+            d.addErrback(onError)
+            defs.append(d)
 
-            except ThingNotFoundError: 
-                # TODO: add built in monitoring of this and hook to clean up scripts
-                log.msg("{} was not found in {}".format(tid,self.tid))
-            else:
-                res.append(thing_dict)
-        defer.returnValue(res)
+        dl = defer.DeferredList(defs)
+        def process(result):
+            res = list()
+            for (status, val) in result:
+                if status and val:
+                    res.append(val)
+            log.msg("cnt",res)
+            return res
+
+        dl.addCallback(process)
+        return dl
+                    
+                
+
+    def _contentsAsDict(self):
+        gc = self.get_contents()
+        
+        def process(val):
+            defs = list()
+            for c in val:
+                defs.append(c.asDict())
+            return defer.DeferredList(defs)
+        def mergeDicts(result):
+            res = list()
+            log.msg(result)
+            for (status, val) in result:
+                if status:
+                    res.append(val)
+            return res
+                   
+
+        gc.addCallback(process)
+        gc.addCallback(mergeDicts)
+        return gc
+
+
         
     @defer.inlineCallbacks
-    def asDict(self,bs=None,contentsParsed=False):
+    def asDict(self,bs=None,contentsParsed=False,**kwargs):
         if contentsParsed:
             
             cnt = yield self._contentsAsDict()
-
+            log.msg("CNT WAS",cnt)
                 
             d = {"contents": cnt}
         else:
@@ -140,9 +174,9 @@ class Topic(Container):
         self.ready.addCallback(onReady)
         
     @defer.inlineCallbacks
-    def asDict(self,bs=None,contentsParsed=False):
+    def asDict(self,bs=None,**kwargs):
         d = {"title": self.title}
-        s = yield super(Topic,self).asDict(bs=d,contentsParsed=contentsParsed)
+        s = yield super(Topic,self).asDict(bs=d,**kwargs)
         d.update(s)
         if bs is None:
             defer.returnValue(d)
@@ -158,9 +192,21 @@ class Post(Thing):
         @defer.inlineCallbacks
         def onReady(a):
             self.poster_uid = yield self._get('poster_uid')
-            self.poster_name = yield self.datasource.get("user:{}:username".format(poster_uid))
+            self.poster_name = yield self.datasource.get("user:{}:username".format(self.poster_uid))
         self.ready.addCallback(onReady)
-        
+    
+    @defer.inlineCallbacks
+    def asDict(self,bs=None,**kwargs):
+        d = {"poster_uid": self.poster_uid,"poster_name": self.poster_name}
+        s = yield super(Post,self).asDict(bs=d,**kwargs)
+        d.update(s)
+        if bs is None:
+            defer.returnValue(d)
+        else:
+            bs.update(d)
+            defer.returnValue(bs)
+
+
 
 class Forum(Container):
     def __init__(self,*args,**kwargs):
@@ -172,10 +218,10 @@ class Forum(Container):
         self.ready.addCallback(onReady)
     
     @defer.inlineCallbacks
-    def asDict(self,bs=None,contentsParsed=False,minimal=False):
+    def asDict(self,bs=None,minimal=False,**kwargs):
         d = {"name": self.name,"tagline": self.tagline }
         if not minimal:
-            s = yield super(Forum,self).asDict(bs=d,contentsParsed=contentsParsed)
+            s = yield super(Forum,self).asDict(bs=d,**kwargs)
             d.update(s)
 
         if bs is None:
@@ -194,12 +240,15 @@ for cls in [Container,Topic,Post,Forum]:
 
 
 @defer.inlineCallbacks
-def anythingFromId(tid,ds):
+def anythingFromId(tid,ds,ready=False):
     tp = yield ds.get("thing:{}:type".format(tid))
     if tp is None:
         raise ThingNotFoundError
     elif not tp in type_to_class:
         raise RuntimeError("no class fitting type {}".format(tp))
     # load it from the datastore and save one db get with pretype
-    defer.returnValue(type_to_class[tp](tid,ds=ds,pretype=tp))
+    val = type_to_class[tp](tid,ds=ds,pretype=tp)
+    if ready:
+        yield val.ready
+    defer.returnValue(val)
      
