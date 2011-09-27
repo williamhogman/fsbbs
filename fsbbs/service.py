@@ -41,12 +41,11 @@ class BBSService(object):
     @defer.inlineCallbacks
     def getThing(self,tid,throw=False):
         try:
-            thing = yield model.anythingFromId(tid,self.ds)
+            thing = yield model.anythingFromId(tid,self.ds,ready=True)
         except model.ThingNotFoundError:
             defer.returnValue({"msg": self._msg("Could not find the requested thing","error")})
             raise
         else:
-            yield thing.ready
             defer.returnValue({"thing": (yield thing.asDict(contentsParsed=True))})
             
         
