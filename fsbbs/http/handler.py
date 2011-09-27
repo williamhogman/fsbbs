@@ -91,7 +91,15 @@ from ..a3 import AuthService
 from ..a3.user import User
 from ..data import datasource
 class SessionAuthMixin(object):
+
     """ mixin adding funcionality for easily verifying sessions """
+    
+    def getUserDict(self):
+        if self.logged_in:
+            return {"user": self.user, "logged_in":self.logged_in} 
+        else:
+            return {"logged_in": self.logged_in}
+
     @defer.inlineCallbacks
     def verifySession(self):
         authserv = AuthService()
@@ -102,6 +110,7 @@ class SessionAuthMixin(object):
         res = yield authserv.getChain("session").run({"session_secret": session_cookie})
 
         self.logged_in = res.success
+
         if self.logged_in:
             self.user = User(res.uid,datasource.getDatasource())
             yield self.user.ready

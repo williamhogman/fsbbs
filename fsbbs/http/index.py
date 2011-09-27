@@ -11,8 +11,9 @@ class IndexHandler(BaseHandler,SessionAuthMixin):
         ses_ver = self.verifySession()
 
         fp = yield service.getFrontpage()
-        upd = {"user": self.user, "logged_in":self.logged_in} if (yield ses_ver) else {"user": self.logged_in}
-        fp.update(upd)
+        yield ses_ver
+
+        fp.update(self.getUserDict())
         upd = yield service.getBasicInfo()
         fp.update(upd)
         html.OutputFormatter.dump("index.html",fp,self)

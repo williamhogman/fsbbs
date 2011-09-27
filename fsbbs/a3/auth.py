@@ -75,7 +75,7 @@ class AuthChain:
             print("leaving {} success:{} failed:{} ".format(module,self._success,self.failed))
 
         def callModule(arg,module):
-            print("entering {}".format(module))
+
             d = defer.maybeDeferred(module.call,self)
             d.addCallbacks(lambda arg: moduleLog())
             return d
@@ -107,7 +107,9 @@ class AuthChain:
     def hasHardFailed(self):
         return self._hardfailure
 
-
+    @property
+    def audit(self):
+        return (self.done,self._success,self.uid,self.failed)
 
     @property
     def success(self):
