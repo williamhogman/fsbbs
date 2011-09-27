@@ -1,5 +1,5 @@
 import cyclone.web
-from .handler import BaseHandler,SimpleJSON,SimpleMsgpack,SessionAuthMixin
+from .handler import BaseHandler,SimpleJSON,SimpleMsgpack,SessionAuthMixin,JSONDataHandler
 from twisted.internet import defer
 from ..service import service
 from ..output import json_out,msgpack_out,html
@@ -20,7 +20,18 @@ class ThingHandler(BaseHandler,SessionAuthMixin):
             html.OutputFormatter.dump("thing.html",thing,self)
         
             
-            
+
+class ThingJSONHandler(JSONDataHandler):
+    @defer.inlineCallbacks
+    def getData(self):
+        tid = self.get_argument("id")
+        try:
+            thing = yield service.getThing(tid,throw=True)
+        except ThingNotFoundError:
+            self.set_status(404)
+        else:
+            defer.returnValue(thing)
             
 import application
 application.addHandler(r"/t/([1-9]+).html",ThingHandler)
+application.addHandler(r"/api/get_thing.json",ThingJSONHandler)
