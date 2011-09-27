@@ -1,6 +1,8 @@
 from twisted.internet import defer
 from twisted.python import log
-import datasource 
+import datasource
+import datetime
+import time
 
 
 class ThingNotFoundError(RuntimeError):
@@ -112,7 +114,7 @@ class Container(Thing):
             for (status, val) in result:
                 if status and val:
                     res.append(val)
-            log.msg("cnt",res)
+
             return res
 
         dl.addCallback(process)
@@ -130,7 +132,6 @@ class Container(Thing):
             return defer.DeferredList(defs)
         def mergeDicts(result):
             res = list()
-            log.msg(result)
             for (status, val) in result:
                 if status:
                     res.append(val)
@@ -141,14 +142,11 @@ class Container(Thing):
         gc.addCallback(mergeDicts)
         return gc
 
-
-        
     @defer.inlineCallbacks
     def asDict(self,bs=None,contentsParsed=False,**kwargs):
         if contentsParsed:
             
             cnt = yield self._contentsAsDict()
-            log.msg("CNT WAS",cnt)
                 
             d = {"contents": cnt}
         else:
@@ -193,11 +191,23 @@ class Post(Thing):
         def onReady(a):
             self.poster_uid = yield self._get('poster_uid')
             self.poster_name = yield self.datasource.get("user:{}:username".format(self.poster_uid))
+            self.text = yield self._get('text')
+            self.pubdate_stamp = yield self._get('pubdate')
         self.ready.addCallback(onReady)
     
+    @property
+    def pubdate(self):
+        if self.pubdate_stamp is None:
+            return None
+        return datetime.datetime.utcfromtimestamp(self.pubdate_stamp)
+    @pubdate.setter
+    def pubdate(self,value):
+        self.pubdate_stamp = time.mktime(value.timetuple())
+
+
     @defer.inlineCallbacks
     def asDict(self,bs=None,**kwargs):
-        d = {"poster_uid": self.poster_uid,"poster_name": self.poster_name}
+        d = {"poster_uid": self.poster_uid,"poster_name": self.poster_name,"text": self.text,"pubdate": self.pubdate}
         s = yield super(Post,self).asDict(bs=d,**kwargs)
         d.update(s)
         if bs is None:
@@ -206,7 +216,30 @@ class Post(Thing):
             bs.update(d)
             defer.returnValue(bs)
 
+class Category(Container):
+    """ 
+    a category system is a common feature on BBSes it allows for the grouping of content into a 
+    basically this is a container with a name
+    """
+    def __init__(self,*args,**kwargs):
+        super(Category,self).__init__(*args,**kwargs)
+        @defer.inlineCallbacks
+        def onReady(a):
+            self.title = yield self._get('title')
+            self.description = yield self._get('description')
+        self.ready.addCallback(onReady)
 
+    @defer.inlineCallbacks
+    def asDict(self,bs=None,**kwargs):
+        d = {"title": self.title, 'description': self.description}
+        s = yield super(Category,self).asDict(bs=d,**kwargs)
+        d.update(s)
+        if bs is None:
+            defer.returnValue(d)
+        else:
+            bs.update(d)
+            defer.returnValue(bs)
+        
 
 class Forum(Container):
     def __init__(self,*args,**kwargs):
@@ -235,7 +268,7 @@ class Forum(Container):
 type_to_class = {}
 
 # creating a mapping list between types in the db and our classes
-for cls in [Container,Topic,Post,Forum]:
+for cls in [Container,Topic,Post,Forum,Category]:
     type_to_class[cls.__name__.lower()] = cls
 
 
