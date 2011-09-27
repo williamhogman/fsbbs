@@ -16,10 +16,11 @@ class ThingHandler(BaseHandler,SessionAuthMixin):
             self.set_status(404)
             self.write("404")
         else:
+            upd = {"user": self.user, "logged_in":self.logged_in} if (yield ses_ver) else {"logged_in": self.logged_in}
+            thing.update(upd)
             thing.update((yield service.getBasicInfo()))
             html.OutputFormatter.dump("thing.html",thing,self)
         
-            
 
 class ThingJSONHandler(JSONDataHandler):
     @defer.inlineCallbacks
