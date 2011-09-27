@@ -2,3 +2,8 @@
   <a href="/index.html" rel="index"><h1>{{forum.name}}</h1></a>
   <h2>{{forum.tagline}}</h2>
 </hgroup>
+{% if logged_in %}
+<p>Welcome back, {{user}}</p>
+{% else %}
+<p>You're not logged in. <a href="/register.html">Register</a> <a href="/login.html">Login</a>
+{% endif %}

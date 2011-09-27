@@ -1,7 +1,20 @@
 from jinja2 import Environment, FileSystemLoader
-
-#from .markdown import markdownToHTML
+from datetime import datetime,date
 from ...service import service
+import markdown
+
+def markdownFilter(text):
+    return markdown.markdown(text,safe_mode=True)
+
+def dateFilter(dt):
+    """ a human readable date"""
+    # TODO: expand on this to include timedeltas and other things.
+    if dt.date() == date.today():
+        return dt.strftime("Today %H:%M")
+    elif dt.year != datetime.now().year:
+        return dt.strftime("%A, %d. %B %Y %H:%M")
+    else:
+        return dt.strftime("%A, %d. %B %H:%M")
 
 class HTMLOutputFormatter:
     """ processes dict objects and uses a template to format them as HTML """
@@ -9,6 +22,9 @@ class HTMLOutputFormatter:
     def __init__(self):
         # actually we don't support themes yet :o
         self.env = Environment(loader=FileSystemLoader('themes/default/'))
+        self.env.filters['markdown'] = markdownFilter
+        self.env.filters['nicedate'] = dateFilter
+                         
 
     def render(self,name,data):
         """ 

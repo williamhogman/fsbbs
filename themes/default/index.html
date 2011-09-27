@@ -5,7 +5,14 @@
   <ul>
   {% for item in main.contents %}
   <li>
+    {% if item.type == "category" %}
+    <div>
+      <a href="/t/{{item.id}}.html"><h3>{{item.title}}</h3></a>
+      {{item.description | markdown}}
+    </div>
+    {% else %}
     <a data-type="{{item.type}}" href="/t/{{item.id}}.html">{{item.title}}</a>
+    {% endif %}
   </li>
   {% endfor %}
   </ul>

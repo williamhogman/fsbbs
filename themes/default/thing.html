@@ -2,14 +2,14 @@
 {% block title %}{{thing.name or thing.title}}{% endblock %}
 
 {% block content %}
-<article class="thing thing-{{thing.type}}">
+<article class="thing thing-{{thing.type}}" data-id="{{thing.id}}">
   <header>
   <a href="/t/{{thing.id}}.html" rel="self"><h2>{{thing.name or thing.title | e}}</h2></a>
   </header>
 
   {% if thing.contents is defined %}
   {% for sub in thing.contents %}
-  <article>
+  <article data-id="{{sub.id}}">
     {% if sub.type == "post" %}
     {% include 'topic_post.html' %}
     {% endif %}
