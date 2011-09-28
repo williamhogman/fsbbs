@@ -15,16 +15,21 @@ class Thing(object):
     def _key(self,name):
         """ returns a string for use in datastore calls"""
         return self._key_cache+name
+
+
+
     
     def _get(self,name):
         """ private, get a key stored for this thing"""
         return self.datasource.get(self._key(name))
-    
+
     def _mget(self,*args):
+        """ gets multiple stored keys in a single request"""
         def conv(args):
             for a in args:
-                yield self._key(args)
-        return self.datasource.mget(*a)
+                yield self._key(str(a))
+
+        return self.datasource.mget(list(conv(args)))
 
     def _set(self,name,val):
         """ private, sets a key stored for this thing"""
@@ -36,10 +41,12 @@ class Thing(object):
 
     @property
     def tid(self):
+        """ gets the id of this thing"""
         return self._tid
 
     @tid.setter
     def tid(self,value):
+        """ updates the cache when the tid is changed """
         self._tid = value
         self._key_cache = "thing:"+str(self._tid)+":"
     
@@ -244,10 +251,10 @@ class Post(Thing):
         super(Post,self).__init__(tid,*args,**kwargs)
         @defer.inlineCallbacks
         def onReady(a):
-            self.poster_uid = yield self._get('poster_uid')
-            self.poster_name = yield self.datasource.get("user:{}:username".format(self.poster_uid))
-            self.text = yield self._get('text')
-            self.pubdate_stamp = yield self._get('pubdate')
+            self.poster_uid, self.text,self.pubdate_stamp= yield self._mget("poster_uid","text","pubdate")
+            self.poster_name = yield usernameById(self.poster_uid,self.datasource)
+            #yield self.datasource.get("user:{}:username".format(self.poster_uid))
+
         if tid > 0:
             self.ready.addCallback(onReady)
     
@@ -306,8 +313,7 @@ class Category(Container):
         super(Category,self).__init__(tid,*args,**kwargs)
         @defer.inlineCallbacks
         def onReady(a):
-            self.title = yield self._get('title')
-            self.description = yield self._get('description')
+            self.title,self.description = yield self._mget("title","description")
         if tid>0:
             self.ready.addCallback(onReady)
 
@@ -328,8 +334,7 @@ class Forum(Container):
         super(Forum,self).__init__(tid,*args,**kwargs)
         @defer.inlineCallbacks
         def onReady(a):
-            self.name = yield self._get('name')
-            self.tagline = yield self._get('tagline')
+            self.name,self.tagline = yield self._mget("name","tagline")
         if tid>0:
             self.ready.addCallback(onReady)
     
@@ -354,6 +359,17 @@ type_to_class = {}
 for cls in [Container,Topic,Post,Forum,Category]:
     type_to_class[cls.__name__.lower()] = cls
 
+user_cache = dict()
+@defer.inlineCallbacks
+def usernameById(userid,ds):
+    """ caching function getting a username by user id """
+    if userid in user_cache:
+        defer.returnValue(user_cache[userid])
+    else:
+        user_cache[userid] = username = yield ds.get("user:{}:username".format(userid))
+        defer.returnValue(username)
+    
+        
 
 @defer.inlineCallbacks
 def anythingFromId(tid,ds,ready=False):
