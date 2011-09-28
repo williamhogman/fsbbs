@@ -1,0 +1,7 @@
+<a href="/t/{{sub.id}}.html"><h3>{{sub.title}}</h3></a>
+{% set op=sub.original_post %}
+Topic created by 
+<a href="/u/{{sub.original_post.poster_uid}}">{{op.poster_name}}</a>
+<time pubdate="1" datetime="{{op.pubdate}}">{{op.pubdate | nicedate}}</time>
+
+

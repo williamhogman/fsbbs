@@ -32,7 +32,40 @@ class ThingJSONHandler(JSONDataHandler):
             self.set_status(404)
         else:
             defer.returnValue(thing)
+
+
+class PostToContainer(BaseHandler,SessionAuthMixin):
+    @defer.inlineCallbacks
+    def post(self):
+        yield self.verifySession()
+        
+        if not self.requireLogin():
+            return
+        tid = int(self.get_argument("tid"))
+        text = self.get_argument("text")      
+        yield service.postToThing(tid,text,self.user)
+        self.redirect("/t/{}.html".format(tid))
+        
+class NewTopic(BaseHandler,SessionAuthMixin):
+    @defer.inlineCallbacks
+    def post(self):
+        yield self.verifySession()
+        
+        if not self.requireLogin():
+            return
+        
+        tid = int(self.get_argument("tid"))
+        title = self.get_argument("title")
+        text = self.get_argument("text")
+        
+        yield service.newTopic(tid,title,text,self.user)
+        
+        self.redirect("/t/{}.html".format(tid))
+
+
             
 import application
 application.addHandler(r"/t/([1-9]+).html",ThingHandler)
 application.addHandler(r"/api/get_thing.json",ThingJSONHandler)
+application.addHandler(r"/new_post",PostToContainer)
+application.addHandler(r"/new_topic",NewTopic)

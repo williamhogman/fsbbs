@@ -48,6 +48,34 @@ class BBSService(object):
         else:
             defer.returnValue({"thing": (yield thing.asDict(contentsParsed=True))})
             
+    @defer.inlineCallbacks
+    def postToThing(self,tid,text,user):
+        cont = yield model.anythingFromId(tid,self.ds,ready=True)
+        post = model.Post.new(text,user.uid,ds=self.ds)
+        if not hasattr(cont,"add"):
+            raise RuntimeError("could not add post to {}".format(cont.__class__.__name__))
+
+        yield post.save()
+        yield cont.add(post.tid)
+
+    @defer.inlineCallbacks
+    def newTopic(self,tid,title,text,user=None):
+        cont = yield model.anythingFromId(tid,self.ds,ready=True)
+
+        if not hasattr(cont,"add"):
+            raise RuntimeError("could not create topic in {}".format(const.__class__.__name__))
+
+        post = model.Post.new(text,user.uid,ds=self.ds)
+        yield post.save()
+
+        topic = model.Topic.new(title,post)
+        yield topic.save()
+        
+        yield cont.add(topic)
+
+
+        
+        
         
 
 service = BBSService(datasource.getDatasource())

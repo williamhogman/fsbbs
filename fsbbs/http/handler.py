@@ -7,9 +7,11 @@ from ..output import json_out,msgpack_out
 
 class BaseHandler(cyclone.web.RequestHandler):
     """ 
-    all fsbbs requests handlers are derived from this class,
-    doesn't override any cyclone behaviour yet
+    all fsbbs requests handlers are derived from this class
     """
+
+    def jsRedirect(self,url):
+        self.finish("<script> document.location='{}'; </script>".format(url))
 
 
 class BaseDataHandler(BaseHandler):
@@ -93,6 +95,13 @@ from ..data import datasource
 class SessionAuthMixin(object):
 
     """ mixin adding funcionality for easily verifying sessions """
+
+    def requireLogin(self):
+        if not self.logged_in:
+            self.set_status(401)
+            self.finish("Unauthorized")
+            return False
+        return True
     
     def getUserDict(self):
         if self.logged_in:

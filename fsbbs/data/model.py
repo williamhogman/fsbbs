@@ -21,8 +21,8 @@ class Thing(object):
         return self.datasource.get(self._key(name))
     def _set(self,name,val):
         """ private, sets a key stored for this thing"""
-        return self.datasource.set(self._key(name))
-        return self.datasource.set("thing:{}:{}".format(self.tid,name),val)
+        return self.datasource.set(self._key(name),val)
+
 
     def __repr__(self):
         return self.type
@@ -34,16 +34,16 @@ class Thing(object):
         """
         d = {"id": self.tid,"type": self.type}
         if bs is None:
-            defer.returnValue(d)
             return defer.succeed(d)
         else:
             bs.update(d)
             return defer.succeed(bs)
         
-
+    @defer.inlineCallbacks
     def newThing(self,t=None):
         """ saves a new thing to the datastore"""
         self.tid = yield self.datasource.incr("thing:next_tid")
+        log.msg("new {} got tid {}".format(t,self.tid))
         self.type = t
         
         if t is not None:
@@ -75,7 +75,7 @@ class Thing(object):
         else:
             self.update = False # changes will cause creation
             # we are already ready so make it a prefired deferred
-            self.ready = defer.succeed()
+            self.ready = defer.succeed(None)
 
 
 class Container(Thing):
@@ -85,13 +85,19 @@ class Container(Thing):
         @defer.inlineCallbacks
         def onReady(a):
             self.contents = yield self.datasource.zrange(self._key("contents"))
-        self.ready.addCallback(onReady)
+        if tid > 0:
+            self.ready.addCallback(onReady)
         
     @defer.inlineCallbacks
     def add(self,thing,score=0):
-        """ adds a pointer to the passed in thing"""
+        # convert to tid
+        if hasattr(thing,"tid"):
+            tid = thing.tid
+        else:
+            tid = int(thing)
+        """ adds a pointer to the passed in thing this operation does not wait for save"""
         self.contents.append(thing)
-        yield self.datasource.zadd(self._key("contents"),score,thing)
+        yield self.datasource.zadd(self._key("contents"),score,tid)
 
     def get_contents(self):
         defs = list()
@@ -169,11 +175,20 @@ class Topic(Container):
             # the original post that started the topic
             self.original_post = yield self._get("original_post")
             self.title = yield self._get("title")
-        self.ready.addCallback(onReady)
+        if tid>0:
+            self.ready.addCallback(onReady)
         
     @defer.inlineCallbacks
     def asDict(self,bs=None,**kwargs):
         d = {"title": self.title}
+        try:
+            op = yield anythingFromId(self.original_post,self.datasource,ready=True)
+            op_dict= yield op.asDict()
+        except ThingNotFoundError:
+            log.msg("Could not find OP in {}".format(self.tid)) # if we can't find the OP just go on
+        else:
+            d.update({"original_post": op_dict})
+
         s = yield super(Topic,self).asDict(bs=d,**kwargs)
         d.update(s)
         if bs is None:
@@ -181,6 +196,27 @@ class Topic(Container):
         else:
             bs.update(d)
             defer.returnValue(bs)
+
+
+    
+
+    @staticmethod
+    def new(title,original_post,ds=None):
+        """ creates a new instance of topic """
+        t = Topic(-1,ds)
+        t.original_post = original_post.tid
+        t.title = title
+        return t
+
+    @defer.inlineCallbacks
+    def save(self):
+        """ saves the topic to the datastore """
+        if not self.update:
+            yield self.newThing("topic")
+            self.update = True
+        yield self._set("original_post",self.original_post)
+        yield self._set("title", self.title)
+            
 
 
 class Post(Thing):
@@ -193,7 +229,8 @@ class Post(Thing):
             self.poster_name = yield self.datasource.get("user:{}:username".format(self.poster_uid))
             self.text = yield self._get('text')
             self.pubdate_stamp = yield self._get('pubdate')
-        self.ready.addCallback(onReady)
+        if tid > 0:
+            self.ready.addCallback(onReady)
     
     @property
     def pubdate(self):
@@ -203,6 +240,31 @@ class Post(Thing):
     @pubdate.setter
     def pubdate(self,value):
         self.pubdate_stamp = time.mktime(value.timetuple())
+
+    @defer.inlineCallbacks
+    def save(self):
+        if not self.update:
+            yield self.newThing("post")
+            self.update = True
+        self._set('poster_uid',self.poster_uid)
+        self._set('text',self.text) 
+        self._set("pubdate",self.pubdate_stamp)
+        
+    @staticmethod
+    def new(text,uid,pubdate=None,ds=None):
+        """ creates a new post """
+        p = Post(-1,ds)
+
+        p.poster_uid = uid
+        p.text = text
+        if pubdate is None:
+            p.pubdate_stamp = time.time()
+        else:
+            p.pubdate_stamp = pubdate
+
+        return p
+
+        
 
 
     @defer.inlineCallbacks
@@ -221,13 +283,14 @@ class Category(Container):
     a category system is a common feature on BBSes it allows for the grouping of content into a 
     basically this is a container with a name
     """
-    def __init__(self,*args,**kwargs):
-        super(Category,self).__init__(*args,**kwargs)
+    def __init__(self,tid,*args,**kwargs):
+        super(Category,self).__init__(tid,*args,**kwargs)
         @defer.inlineCallbacks
         def onReady(a):
             self.title = yield self._get('title')
             self.description = yield self._get('description')
-        self.ready.addCallback(onReady)
+        if tid>0:
+            self.ready.addCallback(onReady)
 
     @defer.inlineCallbacks
     def asDict(self,bs=None,**kwargs):
@@ -242,13 +305,14 @@ class Category(Container):
         
 
 class Forum(Container):
-    def __init__(self,*args,**kwargs):
-        super(Forum,self).__init__(*args,**kwargs)
+    def __init__(self,tid,*args,**kwargs):
+        super(Forum,self).__init__(tid,*args,**kwargs)
         @defer.inlineCallbacks
         def onReady(a):
             self.name = yield self._get('name')
             self.tagline = yield self._get('tagline')
-        self.ready.addCallback(onReady)
+        if tid>0:
+            self.ready.addCallback(onReady)
     
     @defer.inlineCallbacks
     def asDict(self,bs=None,minimal=False,**kwargs):
