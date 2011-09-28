@@ -50,11 +50,11 @@ class RegisterUser:
         if chain.uid is not None: # if there is a UID here we have to stop the process
             chain.failure = True
             return
-        elif not 'username' in chain or chain.failure:
+        elif not 'username' in chain or chain.failed:
             return
         
         
-        uid = yield self.datasource.incr("user:next_uid")
+        chain.uid = uid = yield self.datasource.incr("user:next_uid")
 
 
         username = chain['username']

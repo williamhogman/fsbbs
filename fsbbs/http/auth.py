@@ -13,11 +13,15 @@ class LoginHandler(BaseHandler,SessionAuthMixin):
             self.redirect("/index.html")
             return
         dt = yield service.getBasicInfo()
-        dt.update(dict(logged_in=False))
         html.OutputFormatter.dump("login.html",dt,self)
             
     @defer.inlineCallbacks
     def post(self):
+        logged_in = yield self.verifySession()
+        if logged_in:
+            self.redirect("/index.html")
+            return
+
         username = self.get_argument("username")
         password = self.get_argument("password")
         auth = AuthService()
@@ -37,12 +41,45 @@ class LoginHandler(BaseHandler,SessionAuthMixin):
                                       self)
         
 
+class RegisterHandler(BaseHandler,SessionAuthMixin):
+    @defer.inlineCallbacks
+    def get(self):
+        logged_in = yield self.verifySession()
+        if logged_in:
+            self.redirect("/index.html")
+            return
+        dt = yield service.getBasicInfo()
+        html.OutputFormatter.dump("register.html",dt,self)
+    @defer.inlineCallbacks
+    def post(self):
+        logged_in = yield self.verifySession()
+        if logged_in:
+            self.redirect("/index.html")
+            return
+        username = self.get_argument("username")
+        password = self.get_argument("password")
+        auth = AuthService()  
+        res = yield auth.getChain("register").run({"username":username,"new_password": password})
+        print(res.audit)
+        if res.success:
+            if 'set_session_secret' in res:
+                self.set_cookie("s",res['set_session_secret'])
+            dt = yield service.getBasicInfo()
+            html.OutputFormatter.dump("new_user.html",dt,self)
+        else:
+            dt = {"msg": {"msg": "Could not register user", "kind": "error"}}
+            dt.update((yield service.getBasicInfo()))
+            html.OutputFormatter.dump("register.html",dt,self)
+
+
 class LogoutHandler(BaseHandler):
     
     def get(self):
         self.clear_cookie("s")
+        #todo: invalidate the login cookie
         self.redirect("/index.html")
         
 import application
 application.addHandler(r"/login.html",LoginHandler)
 application.addHandler(r"/logout.html",LogoutHandler)
+application.addHandler(r"/register.html",RegisterHandler)

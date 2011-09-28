@@ -22,7 +22,7 @@ chains = {"default": ["BannedModule","SessionSecretModule",
                       "BasicUsername","DummyPasswords","BasicPasswords","SessionStorageModule"],
           "changepassword": ["SessionSecretModule","BasicUsername","BasicPasswords",
                              "DummyPasswords","ChangeBasicPassword"],
-          "register": ["BasicUsername","RegisterUser","ChangeBasicPassword"],
+          "register": ["BasicUsername","RegisterUser","ChangeBasicPassword","SessionStorageModule"],
           "session": ["SessionSecretModule"]
           }    
     
@@ -71,13 +71,13 @@ class AuthChain:
         # create our defered
         d = defer.Deferred()
         
-        def moduleLog():
-            print("leaving {} success:{} failed:{} ".format(module,self._success,self.failed))
+        def moduleLog(module):
+            print("leaving {} success:{} failed:{} ".format(module.__class__.__name__,self._success,self.failed))
 
         def callModule(arg,module):
 
             d = defer.maybeDeferred(module.call,self)
-            d.addCallbacks(lambda arg: moduleLog())
+            d.addCallbacks(lambda arg: moduleLog(module))
             return d
 
         for module in self.modules:

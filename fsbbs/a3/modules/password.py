@@ -52,7 +52,9 @@ class BasicPasswords(BasicPasswordMixin):
 
     @defer.inlineCallbacks
     def call(self,chain):
-        if not "password" in chain or chain.uid is None:
+        if not "password" in chain:
+            return
+        elif chain.uid is None:
             return
 
 
