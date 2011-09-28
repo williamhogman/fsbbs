@@ -14,11 +14,18 @@ class Thing(object):
 
     def _key(self,name):
         """ returns a string for use in datastore calls"""
-        return "thing:{}:{}".format(self.tid,name)
+        return self._key_cache+name
     
     def _get(self,name):
         """ private, get a key stored for this thing"""
         return self.datasource.get(self._key(name))
+    
+    def _mget(self,*args):
+        def conv(args):
+            for a in args:
+                yield self._key(args)
+        return self.datasource.mget(*a)
+
     def _set(self,name,val):
         """ private, sets a key stored for this thing"""
         return self.datasource.set(self._key(name),val)
@@ -26,6 +33,17 @@ class Thing(object):
 
     def __repr__(self):
         return self.type
+
+    @property
+    def tid(self):
+        return self._tid
+
+    @tid.setter
+    def tid(self,value):
+        self._tid = value
+        self._key_cache = "thing:"+str(self._tid)+":"
+    
+    
 
     def asDict(self,bs=None,**kwargs):
         """ 
@@ -49,7 +67,8 @@ class Thing(object):
         if t is not None:
             yield self._set("type",t)
             
-        
+
+
     @defer.inlineCallbacks
     def loadThing(self,tid):
         self.tid = tid

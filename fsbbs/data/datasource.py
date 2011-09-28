@@ -31,6 +31,9 @@ class DataSource:
     
     def zadd(self,key,score,value):
         return self.api.zadd(key,score,value)
+    
+    def mget(self,*args):
+        return self.api.mget(*args)
 
 dsf = DataSourceFactory()
 def getDatasource():
