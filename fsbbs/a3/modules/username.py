@@ -18,14 +18,18 @@ class BasicUsername:
     def __init__(self):
         self.datasource = datasource.getDatasource()
 
+    def precondition(self,chain):
+        # the UID has not been found yet
+        if chain.uid is None:
+            return True
+
+        return False
+
+
     @defer.inlineCallbacks
     def call(self,chain):
-        #uid found already
-        if chain.uid is not None:
-            return
-
+        
         username = chain['username'].lower()
-
 
         uid = yield self.datasource.get("username:{}:uid".format(chain['username']))
         if uid is not None:
@@ -46,7 +50,7 @@ class RegisterUser:
 
     @defer.inlineCallbacks
     def call(self,chain):
-        # username taken
+        # is the username taken
         if chain.uid is not None: # if there is a UID here we have to stop the process
             chain.failure = True
             return

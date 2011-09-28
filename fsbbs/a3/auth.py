@@ -43,7 +43,7 @@ class AuthService:
         
 
 class AuthChain:
-    """ calls the authentication modules that are used"""
+    """ A chain of AuthModules to call during the authentication process, keeps shared state thru the process"""
     def __init__(self):
         self.done = False
         self._hardfailure = False
@@ -67,29 +67,42 @@ class AuthChain:
 
 
     def run(self,data,cb=None):
+        """Runs the authchain using the passed in data and an optional callback"""
         self.data = data
-        # create our defered
+
+
         d = defer.Deferred()
         
+
+        def logFromModule(module,msg):
+            log.msg("{} {}".format(module.__class__.__name__,msg))
+
         def moduleLog(module):
-            print("leaving {} success:{} failed:{} ".format(module.__class__.__name__,self._success,self.failed))
+            logFromModule(module,"success:{} failed:{}".format(self._success,self.failed))
 
         def callModule(arg,module):
+            shouldRun = module.precondition(self) if hasattr(module,"precondition") else True
 
-            d = defer.maybeDeferred(module.call,self)
-            d.addCallbacks(lambda arg: moduleLog(module))
+            if shouldRun:
+                d = defer.maybeDeferred(module.call,self)
+                d.addCallbacks(lambda arg: moduleLog(module))
+            else:
+                        
+                d = defer.succeed(None)
             return d
 
         for module in self.modules:
             d.addCallback(callModule,module)
+
         def onDone(chain):
-            print("DONE!--")
+            log.msg("AuthChain has run till completetion")
             self.done = True
             return self
 
 
 
         d.addCallback(onDone)
+        # add optional callback
         if cb is not None:
             d.addCallback(cb)
 
@@ -103,12 +116,15 @@ class AuthChain:
 
 
     def failHard(self):
+        """ cause the module to fail into an unrecoverable state,
+        this means that the chain will never be successful"""
         self._hardfailure = True
     def hasHardFailed(self):
         return self._hardfailure
 
     @property
     def audit(self):
+        """ gets a tuple with the actual state of the auth chain. """
         return (self.done,self._success,self.uid,self.failed)
 
     @property
@@ -118,7 +134,10 @@ class AuthChain:
         """
         return self.done and self._success and self.uid is not None and not self.failed
 
-
+    @success.setter
+    def success(self,value):
+        if not self._hardfailure:
+            self._success = value
 
                 
 
