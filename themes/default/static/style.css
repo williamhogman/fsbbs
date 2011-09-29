@@ -314,7 +314,7 @@ h3 {
    
    input[type=text]
    {
-      width 50%;
+      width: 50%;
    }
 
    .actions
@@ -491,7 +491,7 @@ input,textarea{
   padding: 4px;
   font-size: 13px;
   line-height: 18px;
-  color: #808080;
+  color: #404040;
   border: 1px solid #ccc;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
@@ -507,8 +507,13 @@ textarea {
    height: 5em;
 }
 
-input[name=title]
+.input {
+   padding: 0 0 1em 0;
+}
+
+legend
 {
+   padding: 1em 0;
 }
 
 .actions input[type=submit] {
@@ -547,8 +552,7 @@ input[name=title]
 }
 
 
-
-.clearfix
+nav.listing ul
 {
-   clear: both;
+   list-style-type: none;
 }

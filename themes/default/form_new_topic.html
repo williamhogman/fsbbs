@@ -1,0 +1,15 @@
+<form action="/new_topic" method="post">
+  <legend>Create topic</legend>
+  <input type="hidden" name="tid" value="{{thing.id}}" />
+  <div class="input">
+    <label for="title">Title</label>
+    <input type="text" name="title" />
+  </div>
+  <div class="input">
+    <label for="text">Text</label>
+    <textarea name="text"></textarea>
+  </div>
+  <div class="actions">
+    <input type="submit" value="Post" />
+  </div>
+</form>
