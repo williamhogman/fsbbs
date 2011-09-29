@@ -365,6 +365,18 @@ def usernameById(userid,ds):
 @defer.inlineCallbacks
 def manyFromIds(tids,ds,ready=False,throw=False):
     """ returns a list of things when passed in a list of tids """
+
+    # one or fewer are special cases
+    if len(tids) < 2:
+
+        if len(tids) > 0:
+            # just call the simpler function
+            thing = yield anythingFromId(tids[0],ds,ready=ready)
+            defer.returnValue(list(thing))
+        else:
+            # return an empty list
+            defer.returnValue(list())
+
     def tidsToKey(tids):
         for t in tids:
             yield "thing:"+str(t)+":type"
