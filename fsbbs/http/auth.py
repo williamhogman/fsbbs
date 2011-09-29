@@ -3,7 +3,8 @@ from .handler import BaseHandler,SimpleJSON,SimpleMsgpack,SessionAuthMixin
 from twisted.internet import defer
 from ..service import service
 from ..output import json_out,msgpack_out,html
-from ..a3 import AuthService
+from ..a3 import AuthService,User
+from ..data import datasource
 
 class LoginHandler(BaseHandler,SessionAuthMixin):
     @defer.inlineCallbacks
@@ -65,6 +66,8 @@ class RegisterHandler(BaseHandler,SessionAuthMixin):
             if 'set_session_secret' in res:
                 self.set_cookie("s",res['set_session_secret'])
             dt = yield service.getBasicInfo()
+            dt['new_username'] = username.lower()
+            dt['hidelogin'] = True
             html.OutputFormatter.dump("new_user.html",dt,self)
         else:
             dt = {"msg": {"msg": "Could not register user", "kind": "error"}}

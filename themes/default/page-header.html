@@ -4,9 +4,11 @@
 </hgroup>
 
 <div class="loginbar">
+{% if not hidelogin %}
 {% if user %}
 Welcome back, {{user.username}} <a href="/logout.html">Logout</a>
 {% else %}
 You're not logged in. <a href="/register.html">Register</a> <a href="/login.html">Login</a>
+{% endif %}
 {% endif %}
 </div>
