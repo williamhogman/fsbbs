@@ -216,14 +216,16 @@ body {
       margin-left: 75%;
 }
 
-textarea
+
+
+.medinput
 {
-      width: 100%;
+   width: 50%;
 }
 
-input[type=text]
+textarea,.largeinput
 {
-   width: 100%;
+      width: 100%;
 }
 
    
@@ -307,16 +309,22 @@ h3 {
       margin-left: 50%;
    }
 
-   textarea
+
+
+   .medinput
    {
-      width: 50%;
+   width: 25%;
    }
-   
-   input[type=text]
+
+   textarea,.largeinput
    {
       width: 50%;
    }
 
+
+
+
+   
    .actions
    {
       margin-left: 50%;
@@ -394,12 +402,15 @@ h3 {
   #twoway .wrapper:first-child {
     margin-left: 25%;
   }
-   input[type=text]
-   {
-      width: 25%;
-   }
+
    
-   textarea
+   .medinput
+   {
+      width: 12.5%;
+   }
+
+
+   textarea,.largeinput
    {
       width: 25%;
    }
@@ -555,4 +566,9 @@ legend
 nav.listing ul
 {
    list-style-type: none;
+}
+
+.hide
+{
+   display: none;
 }
