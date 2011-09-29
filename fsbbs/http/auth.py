@@ -65,10 +65,11 @@ class RegisterHandler(BaseHandler,SessionAuthMixin):
         if res.success:
             if 'set_session_secret' in res:
                 self.set_cookie("s",res['set_session_secret'])
-            dt = yield service.getBasicInfo()
-            dt['new_username'] = username.lower()
-            dt['hidelogin'] = True
-            html.OutputFormatter.dump("new_user.html",dt,self)
+            data = dict()
+            data.update((yield service.getBasicInfo()))
+            data['new_username'] = username.lower()
+            data['hidelogin'] = True
+            html.OutputFormatter.dump("new_user.html",data,self)
         else:
             dt = {"msg": {"msg": "Could not register user", "kind": "error"}}
             dt.update((yield service.getBasicInfo()))
