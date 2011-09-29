@@ -7,14 +7,14 @@
   <a href="/t/{{thing.id}}.html" rel="self"><h2>{{thing.name or thing.title | e}}</h2></a>
   {% if thing.type == "topic" %}
   {% set op = thing.original_post %}
-  Topic created by <a data-id="{{op.poster_uid}}" href="/u/{{op.poster_uid}}.html">{{op.poster_name | e}}</a> 
+  <p>Topic created by <a data-id="{{op.poster_uid}}" href="/u/{{op.poster_uid}}.html">{{op.poster_name | e}}</a>
   {% if op.pubdate %}
   <time pubdate="1" datetime="{{op.pubdate.isoformat()}}">{{op.pubdate | nicedate}}</time>
   {% endif %}
+  </p>
   </header>
-  <div>
     {% if op.text %}
-    <div>{{op.text | markdown}}</div>
+    <div class="op">{{op.text | markdown}}</div>
     {% endif %}
 
   {% else %}
@@ -44,6 +44,7 @@
     </div>
     
   </form>
+  <div class="clearfix"></div>
   {% elif thing.type == "category" %}
   <form action="/new_topic" method="post">
     <legend>Create topic</legend>
@@ -60,6 +61,7 @@
       <input type="submit" value="Post" />
     </div>
   </form>
+
   {% endif %}
   {% endif %}
 

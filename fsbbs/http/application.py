@@ -29,13 +29,14 @@ def addHandlers(path,subhandlers):
 import index
 import thing
 import auth
+
+
+
 class Application(cyclone.web.Application):
     def __init__(self):
         handlers = _handlers
 
         settings = dict(
-            template_path=os.path.join(os.path.dirname(__file__), "templates"),
-            static_path=os.path.join(os.path.dirname(__file__), "static"),
-            autoescape="xhtml_escape",
         )
+        handlers.append((r"/s/(.*)",cyclone.web.StaticFileHandler,{"path": "themes/default/static/"}))
         cyclone.web.Application.__init__(self, handlers, **settings)

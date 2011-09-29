@@ -3,8 +3,10 @@
   <h2>{{forum.tagline}}</h2>
 </hgroup>
 
+<div class="loginbar">
 {% if user %}
-<p>Welcome back, {{user.username}} <a href="/logout.html">Logout</a></p>
+Welcome back, {{user.username}} <a href="/logout.html">Logout</a>
 {% else %}
-<p>You're not logged in. <a href="/register.html">Register</a> <a href="/login.html">Login</a>
+You're not logged in. <a href="/register.html">Register</a> <a href="/login.html">Login</a>
 {% endif %}
+</div>
