@@ -372,7 +372,7 @@ def manyFromIds(tids,ds,ready=False,throw=False):
         if len(tids) > 0:
             # just call the simpler function
             thing = yield anythingFromId(tids[0],ds,ready=ready)
-            defer.returnValue(list(thing))
+            defer.returnValue([thing])
         else:
             # return an empty list
             defer.returnValue(list())
