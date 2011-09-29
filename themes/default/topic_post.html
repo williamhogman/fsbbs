@@ -4,8 +4,6 @@ Posted by <a data-id="{{sub.poster_uid}}" href="/u/{{sub.poster_uid}}.html">{{su
 <time pubdate="1" datetime="{{sub.pubdate.isoformat()}}">{{sub.pubdate | nicedate}}</time>
 {% endif %}
 </header>
-<div>
-  {% if sub.text %}
-  {{sub.text | markdown}}
-  {% endif %}
-</div>
+{% if sub.text %}
+<div>{{sub.text | markdown}}</div>
+{% endif %}

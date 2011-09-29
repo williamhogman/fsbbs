@@ -5,11 +5,20 @@
 <article class="thing thing-{{thing.type}}" data-id="{{thing.id}}">
   <header>
   <a href="/t/{{thing.id}}.html" rel="self"><h2>{{thing.name or thing.title | e}}</h2></a>
-  </header>
   {% if thing.type == "topic" %}
+  {% set op = thing.original_post %}
+  Topic created by <a data-id="{{op.poster_uid}}" href="/u/{{op.poster_uid}}.html">{{op.poster_name | e}}</a> 
+  {% if op.pubdate %}
+  <time pubdate="1" datetime="{{op.pubdate.isoformat()}}">{{op.pubdate | nicedate}}</time>
+  {% endif %}
+  </header>
+  <div>
+    {% if op.text %}
+    <div>{{op.text | markdown}}</div>
+    {% endif %}
 
-  {% set sub = thing.original_post %}
-  {% include 'topic_post.html' %}
+  {% else %}
+  </header>
   {% endif %}
   {% if thing.contents is defined %}
   {% for sub in thing.contents %}
