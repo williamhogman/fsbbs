@@ -126,6 +126,7 @@ class Container(Thing):
         yield self.datasource.zadd(self._key("contents"),score,tid)
 
     def get_contents(self):
+        return manyFromIds(self.contents,self.datasource,ready=True)
         defs = list()
         for tid in self.contents:
             ## yo dawg so i herd u liek async!
@@ -153,26 +154,16 @@ class Container(Thing):
         return dl
                     
                 
-
+    @defer.inlineCallbacks
     def _contentsAsDict(self):
-        gc = self.get_contents()
-        
-        def process(val):
-            defs = list()
-            for c in val:
-                defs.append(c.asDict())
-            return defer.DeferredList(defs)
-        def mergeDicts(result):
-            res = list()
-            for (status, val) in result:
-                if status:
-                    res.append(val)
-            return res
-                   
+        things = yield self.get_contents()
 
-        gc.addCallback(process)
-        gc.addCallback(mergeDicts)
-        return gc
+        ret = list()
+        for t in things:
+            ret.append((yield t.asDict()))
+
+        defer.returnValue(ret)
+
 
     @defer.inlineCallbacks
     def asDict(self,bs=None,contentsParsed=False,**kwargs):
@@ -199,8 +190,9 @@ class Topic(Container):
         @defer.inlineCallbacks
         def onReady(a):
             # the original post that started the topic
-            self.original_post = yield self._get("original_post")
-            self.title = yield self._get("title")
+            self.original_post,self.title = yield self._mget("original_post","title")
+            #self.original_post = yield self._get("original_post")
+            #self.title = yield self._get("title")
         if tid>0:
             self.ready.addCallback(onReady)
         
@@ -369,10 +361,43 @@ def usernameById(userid,ds):
         user_cache[userid] = username = yield ds.get("user:{}:username".format(userid))
         defer.returnValue(username)
     
+    
+@defer.inlineCallbacks
+def manyFromIds(tids,ds,ready=False,throw=False):
+    """ returns a list of things when passed in a list of tids """
+    def tidsToKey(tids):
+        for t in tids:
+            yield "thing:"+str(t)+":type"
         
+    things = list()
+    # pass in tids to the function
+    types = yield ds.mget(*tidsToKey(tids))
+ 
+
+    for i in xrange(len(tids)):
+        if types[i] is None:
+            if throw:
+                raise ThingNotFoundError
+            else:
+                log.msg("Thing {} not found".format(tids[i]))
+                continue
+        elif not types[i] in type_to_class:
+            raise RuntimeError("no class fitting type {}".format(tp))
+        
+        things.append(type_to_class[types[i]](tids[i],ds=ds,pretype=types[i]))
+        
+    # we wait for readyness once all the things have been loaded
+    if ready:
+        # get a list of things  and make a defered
+        yield defer.DeferredList([thing.ready for thing in things])
+    
+    defer.returnValue(things)
+    
+    
 
 @defer.inlineCallbacks
 def anythingFromId(tid,ds,ready=False):
+    """ returns a subclass of the thing by tid"""
     tp = yield ds.get("thing:{}:type".format(tid))
     if tp is None:
         raise ThingNotFoundError
