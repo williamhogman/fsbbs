@@ -2,16 +2,17 @@
 {% block title %}{{thing.name or thing.title}}{% endblock %}
 
 {% block content %}
-<article class="thing thing-{{thing.type}}" data-id="{{thing.id}}">
+<article class="thing thing-{{thing.type}}" data-id="{{thing.id}}" itemscope itemtype="http://schema.org/CreativeWork">
   <header>
   <a href="/t/{{thing.id}}.html" rel="self"><h2>{{thing.name or thing.title | e}}</h2></a>
   {% if thing.type == "topic" %}
   {% set op = thing.original_post %}
-  <p>Topic created by <a data-id="{{op.poster_uid}}" href="/u/{{op.poster_uid}}.html">{{op.poster_name | e}}</a>
+  <p>Topic created by <a rel="author" itemprop="creator" data-id="{{op.poster_uid}}" href="/u/{{op.poster_uid}}.html">{{op.poster_name | e}}</a>
   {% if op.pubdate %}
-  <time pubdate datetime="{{op.pubdate.isoformat()}}Z">{{op.pubdate | nicedate}}</time>
+  <time pubdate itemprop="dateCreated" datetime="{{op.pubdate.isoformat()}}Z">{{op.pubdate | nicedate}}</time>.
   {% endif %}
   </p>
+
   </header>
     {% if op.text %}
     <div class="op">{{op.text | markdown}}</div>
@@ -21,6 +22,7 @@
   </header>
   {% endif %}
   {% if thing.contents is defined %}
+  <meta itemprop="interactionCount" content="UserComments:{{thing.contents | length}}" />
   {% for sub in thing.contents %}
   <article data-id="{{sub.id}}">
     {% if sub.type == "post" %}
