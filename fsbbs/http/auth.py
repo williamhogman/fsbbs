@@ -61,7 +61,6 @@ class RegisterHandler(BaseHandler,SessionAuthMixin):
         password = self.get_argument("password")
         auth = AuthService()  
         res = yield auth.getChain("register").run({"username":username,"new_password": password})
-        print(res.audit)
         if res.success:
             if 'set_session_secret' in res:
                 self.set_cookie("s",res['set_session_secret'])
