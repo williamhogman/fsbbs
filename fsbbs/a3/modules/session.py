@@ -26,7 +26,7 @@ class SessionSecretModule:
 
 
             # session has been limited by ip
-            if 'remote-addr' in data:
+            if 'remote-addr' in chain:
                 sess_ip = yield self.datasource.get("session-ip:"+chain['session_secret'])                
                 if sess_ip != data['remote-addr']: 
                     chain['attack-session-hijack'] = True                   
