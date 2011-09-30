@@ -32,6 +32,8 @@ class BasicPasswordMixin:
         if self._salt is not None:
             return defer.succeed(self._salt)
         def cacheSalt(v):
+            if v is None:
+                raise RuntimeError, "Salt can't be None"
             self._salt = v
             return v
         d =  self.datasource.get("authmod:BasicPasswords:salt").addCallback(cacheSalt)
