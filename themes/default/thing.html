@@ -9,7 +9,7 @@
   {% set op = thing.original_post %}
   <p>Topic created by <a data-id="{{op.poster_uid}}" href="/u/{{op.poster_uid}}.html">{{op.poster_name | e}}</a>
   {% if op.pubdate %}
-  <time pubdate="1" datetime="{{op.pubdate.isoformat()}}">{{op.pubdate | nicedate}}</time>
+  <time pubdate datetime="{{op.pubdate.isoformat()}}Z">{{op.pubdate | nicedate}}</time>
   {% endif %}
   </p>
   </header>

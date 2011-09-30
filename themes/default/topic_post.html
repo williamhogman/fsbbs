@@ -1,7 +1,7 @@
 <header>
 Posted by <a data-id="{{sub.poster_uid}}" href="/u/{{sub.poster_uid}}.html">{{sub.poster_name | e}}</a> 
 {% if sub.pubdate %}
-<time pubdate="1" datetime="{{sub.pubdate.isoformat()}}">{{sub.pubdate | nicedate}}</time>
+<time pubdate datetime="{{sub.pubdate.isoformat()}}Z">{{sub.pubdate | nicedate}}</time>
 {% endif %}
 </header>
 {% if sub.text %}
