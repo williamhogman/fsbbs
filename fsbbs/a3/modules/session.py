@@ -23,14 +23,16 @@ class SessionSecretModule:
         uid = yield self.datasource.get("session:"+chain['session_secret'])
         if uid is not None:
             chain.uid = uid
-            sess_ip = yield self.datasource.get("session-ip:"+chain['session_secret'])
+
 
             # session has been limited by ip
-            if sess_ip is not None and sess_ip != data['ipaddr']:
-                chain['attack-session-hijack'] = True
-                chain.failHard() # Session hijacking probably
-                return
-
+            if 'remote-addr' in data:
+                sess_ip = yield self.datasource.get("session-ip:"+chain['session_secret'])                
+                if sess_ip != data['remote-addr']: 
+                    chain['attack-session-hijack'] = True                   
+                    chain.failHard() # Session hijacking probably
+                    return
+            
             chain._success = True
 
 
