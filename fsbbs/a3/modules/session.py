@@ -21,7 +21,6 @@ class SessionSecretModule:
         if not "session_secret" in chain:
             return
         uid = yield self.datasource.get("session:"+chain['session_secret'])
-        print("SessionSecret ",uid)
         if uid is not None:
             chain.uid = uid
             sess_ip = yield self.datasource.get("session-ip:"+chain['session_secret'])
