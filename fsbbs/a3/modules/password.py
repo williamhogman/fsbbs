@@ -6,6 +6,7 @@ from ..interface import IAuthModule
 from ...data import datasource
 from .helpers import addAuthModule
 from twisted.internet import defer
+from twisted.python import log
 import hashlib
 
 class DummyPasswords():
@@ -17,7 +18,7 @@ class DummyPasswords():
     fsbbs has something for everyone, even crackers ;)
     """
     def __init__(self):
-        print("""Dummy passwords running \n "I have a bad feeling about this" """)
+        log.msg("""Dummy passwords running \n"I have a bad feeling about this" """)
 
     def call(self,chain):
         if "password" in chain and chain['password'] == "id10t":

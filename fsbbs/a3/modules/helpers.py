@@ -1,9 +1,10 @@
+from twisted.python import  log
 authModules = dict()
 
 def addAuthModule(mod):
     name = mod.__name__
     if  name in authModules:
-        print("duplicate module found")
+        log.msg("duplicate module found, {} already loaded".format(name))
     else:
         authModules[name] = mod
-        print("added {}".format(name))
+        log.msg("added {}".format(name))

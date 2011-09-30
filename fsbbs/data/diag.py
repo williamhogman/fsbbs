@@ -5,6 +5,7 @@ from twisted.internet import defer
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import LineReceiver
 from zope.interface import implements
+from twisted.python import log
 from ..diag import DiagProtocol,IDiagFactory
 
         
@@ -32,6 +33,6 @@ class DiagFactory(Factory):
 
 
     def __init__(self,service):
-        print("launching diag")
+        log.msg("launching diag")
         self.ds = datasource.getDatasource()
     
