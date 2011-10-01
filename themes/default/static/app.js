@@ -2,6 +2,7 @@ $script("http://cdnjs.cloudflare.com/ajax/libs/prototype/1.7.0.0/prototype.js","
 $script.ready(
     "ptype",
     function(){
+
 	var api,remote,nearestAttribute,forumLinkClicked;
 	api = window.fsbbs = {};	
 
@@ -22,6 +23,53 @@ $script.ready(
 	    });
 	    return fns;
 	}();
+
+	var humanise = {};
+	/* adapted from https://gist.github.com/colmjude  */
+	humanise.date = (function() {
+
+	    var measures = {
+		second: 1,
+		minute: 60,
+		hour: 3600,
+		day: 86400,
+		week: 604800,
+		month: 2592000,
+		year: 31536000
+	    };
+
+	    var chkMultiple = function(amount, type) {
+		return (amount > 1) ? amount + " " + type + "s":"a " + type;
+	    };
+
+	    return function(thedate) {
+		var dateStr, amount, denomination,
+		current = new Date().getTime(),
+		diff = (current - thedate.getTime()) / 1000; // work with seconds
+
+		if(diff > measures.year) {
+		    return  thedate.toLocaleString();
+		} else if(diff > measures.month) {
+			denomination = "month";
+		} else if(diff > measures.week) {
+			denomination = "week";
+		} else if(diff > measures.day) {
+			denomination = "day";
+		} else if(diff > measures.hour) {
+			denomination = "hour";
+		} else if(diff > measures.minute) {
+			denomination = "minute";
+		} else {
+			dateStr = "a few seconds ago";
+			return dateStr;
+		}
+		amount = Math.round(diff/measures[denomination]);
+		dateStr = chkMultiple(amount, denomination) + " ago";
+		return dateStr;
+	    };
+
+	})();
+
 	 
 	
 	
@@ -31,14 +79,14 @@ $script.ready(
 					 'Topic created by <a href="/u/#{original_post.poster_uid}">'+
 					 '#{original_post.poster_name}</a>&nbsp;'+
 					 '<time timedate="#{original_post.pubdate}">'+
-					 '#{original_post.pubdate}</time>'+
+					 '#{original_post.pubdate_human}</time>'+
 					 '<div class="clearfix"></div></article>'),
 	    thing_start: new Template('<article class="thing thing-#{type}" data-id="#{id}"><header>'+
 					'<a rel="self"><h2>#{title}</h2></a>'+
 					'</header>'),
 	    topic_start: new Template('Topic created by <a data-id="#{op.poster_uid}" '+
 				      'href="/u/#{op.poster_uid}"></a>'+
-				      '<time datetime="#{op.pubdate}">#{op.pubdate_nice}</time>'
+				      '<time datetime="#{op.pubdate}">#{op.pubdate_human}</time>'
 				      ),
 	    thing_end: new Template("</article>")
 	};
@@ -50,7 +98,9 @@ $script.ready(
 	thingPubdate = function(thing){
 	    if (thing.original_post && thing.original_post.pubdate)
 	    {
-		thing.original_post.pubdate = new Date(Date.parse(thing.original_post.pubdate)).toString();
+		thing.original_post.pubdate = new Date(Date.parse(thing.original_post.pubdate));
+		thing.original_post.pubdate_human = humanise.date(thing.original_post.pubdate);
+		
 	    }
 	    return thing;
 	};
