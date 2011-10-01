@@ -30,7 +30,9 @@
     {% elif sub.type == "topic" %}
     {% include 'category_topic.html' %}
     {% endif %}
+    <div class="clearfix"></div>
   </article>
+
   {% endfor %}
   {% if not user is defined %}
   <p>You need to login in order to post</p>

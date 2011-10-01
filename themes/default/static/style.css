@@ -228,6 +228,23 @@ textarea,.largeinput
       width: 100%;
 }
 
+
+.thing-category article h3
+{
+    font-size: 1em; /* semantically we are still a h3; well not quite but google likes this  */
+    margin: 0;
+    width: 100%; /* take up the whole thing on mobile, relatively less on others */
+    float: left;
+}
+.thing-category article p
+{
+    margin: 0  0 1em 0;
+}
+
+.thing-category article
+{
+    border-bottom: 1px dotted;
+}
    
 
 h1, h2 {
@@ -321,13 +338,14 @@ h3 {
       width: 50%;
    }
 
-
-
-
-   
    .actions
    {
       margin-left: 50%;
+   }
+
+   .thing-category article h3
+   {
+       width: 50%;
    }
 }
 /* @media screen and (min-width: 888px) */
@@ -418,6 +436,11 @@ h3 {
    .actions
    {
       margin-left: 25%;
+   }
+
+   .thing-category article h3
+   {
+       width: 25%;
    }
    
 }
@@ -571,4 +594,8 @@ nav.listing ul
 .hide
 {
    display: none;
+}
+.clearfix
+{
+    clear: both;
 }

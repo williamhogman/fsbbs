@@ -7,7 +7,7 @@
   <li>
     {% if item.type == "category" %}
     <div>
-      <a href="/t/{{item.id}}.html"><h3>{{item.title}}</h3></a>
+      <a data-id="{{item.id}}"href="/t/{{item.id}}.html"><h3>{{item.title}}</h3></a>
       {{item.description | markdown}}
     </div>
     {% else %}
