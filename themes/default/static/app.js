@@ -3,8 +3,45 @@ $script.ready(
     "ptype",
     function(){
 
-	var api,remote,nearestAttribute,forumLinkClicked;
+	var api,remote,nearestAttribute,forumLinkClicked,history;
 	api = window.fsbbs = {};	
+
+	api.history = history = function(){
+	    
+	    var h  = window.history || compat(),r = {};
+	    
+	    var push = (window.history.pushState ? window.history.pushState.bind(window.history) : function(){});
+
+	    var HistoryState = Class.create();
+	    HistoryState.prototype = {
+		initialize: function(o){
+		    this.wrapped = o;
+		    // get for how long this resource has been stored
+		    this.stored = new Date();
+		},
+		enter: function(){
+		    if(this.wrapped.onHistoryEnter)
+		    {
+			// call it and give it a chance to refresh
+			this.wrapped.onHistoryEnter(this.stored);
+		    }
+		}
+	    };
+	    
+
+
+
+
+
+	    r.pushThing = function(thing){
+		var url = "/t/"+thing.id+".html",
+		state = new HistoryState(thing),
+		title  = thing.title || thing.name || thing.type || "thing";
+		push(state,title,url);
+	    };
+	    
+	    return r;
+	}();
 
 	api.remote = remote = function(){
 	    var calls = 
@@ -127,7 +164,6 @@ $script.ready(
 	};
 	
 	renderThing = function(thing){
-	    console.log(thing.type);
 	    if(thing.type == "category")
 	    {
 		rendered_contents = [templates.thing_start.evaluate(thingPubdate(thing))];
@@ -137,7 +173,7 @@ $script.ready(
 		rendered_contents.push(templates.thing_end.evaluate(thing));
 
 		$('things').update(rendered_contents.join(""));
-		
+		history.pushThing(thing);
 	    }
 	};
 
