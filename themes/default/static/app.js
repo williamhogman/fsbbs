@@ -43,6 +43,19 @@ $script.ready(
 	    thing_end: new Template("</article>")
 	};
 
+	isoToDate = function(d){
+	    return new Date(Date.parse(d));
+	};
+
+	thingPubdate = function(thing){
+	    if (thing.original_post && thing.original_post.pubdate)
+	    {
+		thing.original_post.pubdate = new Date(Date.parse(thing.original_post.pubdate)).toString();
+	    }
+	    return thing;
+	};
+
+
 
 	/** walks the DOM untill it finds an attribute with the passed in name */
 	nearestAttribute = function(elem,attr){
@@ -60,6 +73,7 @@ $script.ready(
 	
 	loadThing = function(tid){
 	    var success = function(response){
+		
 		renderThing(response.responseJSON.thing);
 	    };
 	    remote.get_thing({"parameters": {"id": tid}, onSuccess: success});
@@ -69,9 +83,9 @@ $script.ready(
 	    console.log(thing.type);
 	    if(thing.type == "category")
 	    {
-		rendered_contents = [templates.thing_start.evaluate(thing)];
+		rendered_contents = [templates.thing_start.evaluate(thingPubdate(thing))];
 		rendered_contents = rendered_contents.concat(thing.contents.map(function(sub){
-		    return templates.category_topic.evaluate(sub);
+		    return templates.category_topic.evaluate(thingPubdate(sub));
 		}));
 		rendered_contents.push(templates.thing_end.evaluate(thing));
 
