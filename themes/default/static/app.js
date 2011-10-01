@@ -211,6 +211,7 @@ $script.ready(
 	    } else if (thing.type == "topic")
 	    {
 		rendered_contents = [templates.thing_start.evaluate(thingPubdate(thing))];
+		rendered_contents.push(templates.topic_post.evaluate(thingPubdate(thing.original_post)));
 		rendered_contents = rendered_contents.concat(thing.contents.map(function(sub){
 		    return templates.topic_post.evaluate(thingPubdate(sub))
 		}));
