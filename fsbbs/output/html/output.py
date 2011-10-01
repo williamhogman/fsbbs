@@ -12,9 +12,9 @@ def dateFilter(dt):
     if dt.date() == date.today():
         return dt.strftime("Today %H:%M")
     elif dt.year != datetime.now().year:
-        return dt.strftime("%A, %d. %B %Y %H:%M")
+        return dt.strftime("%a, %d. %b %Y %H:%M")
     else:
-        return dt.strftime("%A, %d. %B %H:%M")
+        return dt.strftime("%a, %d. %b %H:%M")
 
 class HTMLOutputFormatter:
     """ processes dict objects and uses a template to format them as HTML """
