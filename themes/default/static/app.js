@@ -2,8 +2,8 @@ $script("http://cdnjs.cloudflare.com/ajax/libs/prototype/1.7.0.0/prototype.js","
 $script.ready(
     "ptype",
     function(){
-
-	var api,remote,nearestAttribute,forumLinkClicked,history;
+	console.log("loading fsbbs js");
+	var api,remote,nearestAttribute,forumLinkClicked,history,addLinkEvents;
 	api = window.fsbbs = {};	
 
 	api.history = history = function(){
@@ -15,10 +15,14 @@ $script.ready(
 		{
 		    if(event.state.handle == "thing")
 			renderThing(event.state.wrapped);
+		    else if(event.state.handle == "first")
+			loadThing(event.state.wrapped);
 
 		}
 	    };
-	    var push = (window.history.pushState ? window.history.pushState.bind(window.history) : function(){});
+	    var e = function(){};
+	    var push = (window.history.pushState ? window.history.pushState.bind(window.history) : e);
+	    var replace = (window.history.replaceState ? window.history.replaceState.bind(window.history) : e);
 
 	    var HistoryState = Class.create({
 		initialize: function(o){
@@ -46,15 +50,26 @@ $script.ready(
 		}
 	    });
 
+	    var FirstHistoryState = Class.create(HistoryState,
+            {
+		initialize: function($super,o)
+		{
+		    $super(o);
+		    this.handle = "first";
+		}
+	    });
+
 	    r.pushThing = function(thing){
 		var url = "/t/"+thing.id+".html",
 		state = new ThingHistoryState(thing),
 		title  = thing.title || thing.name || thing.type || "thing";
 		push(state,title,url);
 	    };
-	    
 
-	    
+	    (function(){
+		firstId = $$("#things article")[0].readAttribute("data-id");
+		replace(new FirstHistoryState(firstId),"","#");
+	    })();
 
 	    return r;
 	}();
@@ -134,10 +149,14 @@ $script.ready(
 	    thing_start: new Template('<article class="thing thing-#{type}" data-id="#{id}"><header>'+
 					'<a rel="self"><h2>#{title}</h2></a>'+
 					'</header>'),
-	    topic_start: new Template('Topic created by <a data-id="#{op.poster_uid}" '+
-				      'href="/u/#{op.poster_uid}"></a>'+
-				      '<time datetime="#{op.pubdate}">#{op.pubdate_human}</time>'
-				      ),
+	    topic_post: new Template('<article data-id="#{id}"><header>'+
+				     'Posted by <a data-id="3" href="/u/3.html">william</a>&nbsp;'+
+				     '<time pubdate="" datetime="2011-10-01T21:01:01.050000Z">Today 21:01</time>'+
+				     '</header>'+ 
+				     '<div>#{text}</div>'+
+				     '</article>'
+				    ),
+
 	    thing_end: new Template("</article>")
 	};
 
@@ -175,11 +194,13 @@ $script.ready(
 	    var success = function(response){
 		
 		renderThing(response.responseJSON.thing);
+		
 	    };
 	    remote.get_thing({"parameters": {"id": tid}, onSuccess: success});
 	};
 	
 	renderThing = function(thing){
+	    var rendered_contents;
 	    if(thing.type == "category")
 	    {
 		rendered_contents = [templates.thing_start.evaluate(thingPubdate(thing))];
@@ -187,10 +208,17 @@ $script.ready(
 		    return templates.category_topic.evaluate(thingPubdate(sub));
 		}));
 		rendered_contents.push(templates.thing_end.evaluate(thing));
-
-		$('things').update(rendered_contents.join(""));
-		history.pushThing(thing);
+	    } else if (thing.type == "topic")
+	    {
+		rendered_contents = [templates.thing_start.evaluate(thingPubdate(thing))];
+		rendered_contents = rendered_contents.concat(thing.contents.map(function(sub){
+		    return templates.topic_post.evaluate(thingPubdate(sub))
+		}));
+		rendered_contents.push(templates.thing_end.evaluate(thing));
 	    }
+	    $('things').update(rendered_contents.join(""));
+	    history.pushThing(thing);
+	    addLinkEvents();
 	};
 
 	forumLinkClicked = function(ev){
@@ -203,8 +231,15 @@ $script.ready(
 	    }
 	};
 	
-	$$("article[data-id] a").each(function(item){
-	    item.observe("click",forumLinkClicked);
+	addLinkEvents = (function(){
+	    $$("article[data-id] a").each(function(item){
+		item.observe("click",forumLinkClicked);
+	    });
 	});
+
+	addLinkEvents();
+
+	
+	
 	
     });
