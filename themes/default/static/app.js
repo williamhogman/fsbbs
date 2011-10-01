@@ -8,12 +8,19 @@ $script.ready(
 
 	api.history = history = function(){
 	    
-	    var h  = window.history || compat(),r = {};
-	    
+	    var r = {};
+	    window.onpopstate = function(event){
+		// call enter
+		if(event.state != null)
+		{
+		    if(event.state.handle == "thing")
+			renderThing(event.state.wrapped);
+
+		}
+	    };
 	    var push = (window.history.pushState ? window.history.pushState.bind(window.history) : function(){});
 
-	    var HistoryState = Class.create();
-	    HistoryState.prototype = {
+	    var HistoryState = Class.create({
 		initialize: function(o){
 		    this.wrapped = o;
 		    // get for how long this resource has been stored
@@ -26,15 +33,29 @@ $script.ready(
 			this.wrapped.onHistoryEnter(this.stored);
 		    }
 		}
-	    };
+	    });
 	    
+	    var ThingHistoryState = Class.create(HistoryState,
+	    {
+		initialize: function($super,o){
+		    $super(o);
+		    this.handle = "thing";
+		},
+		enter: function($super){
+		    renderThing(this.wrapped);
+		}
+	    });
+
 	    r.pushThing = function(thing){
 		var url = "/t/"+thing.id+".html",
-		state = new HistoryState(thing),
+		state = new ThingHistoryState(thing),
 		title  = thing.title || thing.name || thing.type || "thing";
 		push(state,title,url);
 	    };
 	    
+
+	    
+
 	    return r;
 	}();
 
