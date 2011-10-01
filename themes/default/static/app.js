@@ -28,11 +28,6 @@ $script.ready(
 		}
 	    };
 	    
-
-
-
-
-
 	    r.pushThing = function(thing){
 		var url = "/t/"+thing.id+".html",
 		state = new HistoryState(thing),
