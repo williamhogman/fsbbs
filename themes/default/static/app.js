@@ -27,7 +27,6 @@ $script.ready(
 	var humanise = {};
 	/* adapted from https://gist.github.com/colmjude  */
 	humanise.date = (function() {
-
 	    var measures = {
 		second: 1,
 		minute: 60,
@@ -36,9 +35,7 @@ $script.ready(
 		week: 604800,
 		month: 2592000,
 		year: 31536000
-	    };
-
-	    var chkMultiple = function(amount, type) {
+	    }, chkMultiple = function(amount, type) {
 		return (amount > 1) ? amount + " " + type + "s":"a " + type;
 	    };
 
@@ -139,7 +136,7 @@ $script.ready(
 		}));
 		rendered_contents.push(templates.thing_end.evaluate(thing));
 
-		$('container').update(rendered_contents.join(""));
+		$('things').update(rendered_contents.join(""));
 		
 	    }
 	};

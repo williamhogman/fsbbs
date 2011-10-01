@@ -2,6 +2,7 @@
 {% block title %}{{thing.name or thing.title}}{% endblock %}
 
 {% block content %}
+<div id="things">
 <article class="thing thing-{{thing.type}}" data-id="{{thing.id}}" itemscope itemtype="http://schema.org/CreativeWork">
   <header>
   <a href="/t/{{thing.id}}.html" rel="self"><h2>{{thing.name or thing.title | e}}</h2></a>
@@ -34,6 +35,14 @@
   </article>
 
   {% endfor %}
+
+
+
+  {% endif %}
+
+</article>
+</div>
+<div id="interactions">
   {% if not user is defined %}
   <p>You need to login in order to post</p>
   {% elif thing.type == "topic" %}
@@ -41,9 +50,5 @@
   {% elif thing.type == "category" %}
   {% include "form_new_topic.html" %}
   {% endif %}
-
-
-  {% endif %}
-
-</article>
+</div>
 {% endblock %}
