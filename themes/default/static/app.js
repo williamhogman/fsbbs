@@ -1,4 +1,8 @@
 $script("http://cdnjs.cloudflare.com/ajax/libs/prototype/1.7.0.0/prototype.js","ptype");
+
+$script(["Markdown.Converter.js","Markdown.Sanitizer.js","Markdown.Editor.js"].map(function(v){
+    return "/j/vendor/pagedown/"+v;
+}),"markdown");
 $script.ready(
     "ptype",
     function(){
@@ -250,6 +254,19 @@ $script.ready(
 	addLinkEvents();
 
 	
-	
+	// markdown is scoped here
+	var md = {};
+	// yes, we are still inside our main namespace
+	$script.ready("markdown",function(){
+	    var converter = Markdown.getSanitizingConverter();
+	    
+	    md.addEditor = (function(idpostfix){
+		editor = new Markdown.Editor(converter,idpostfix);
+		editor.run();
+	    });
+	    md.addEditor("-newtopic");
+	    console.log("new topics added");
+	});
+
 	
     });
