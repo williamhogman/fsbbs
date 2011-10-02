@@ -201,22 +201,23 @@ $script.ready(
 	
 	renderThing = function(thing){
 	    var rendered_contents;
+	    rendered_contents = [templates.thing_start.evaluate(thingPubdate(thing))];
 	    if(thing.type == "category")
 	    {
-		rendered_contents = [templates.thing_start.evaluate(thingPubdate(thing))];
+
 		rendered_contents = rendered_contents.concat(thing.contents.map(function(sub){
 		    return templates.category_topic.evaluate(thingPubdate(sub));
 		}));
-		rendered_contents.push(templates.thing_end.evaluate(thing));
+
 	    } else if (thing.type == "topic")
 	    {
-		rendered_contents = [templates.thing_start.evaluate(thingPubdate(thing))];
 		rendered_contents.push(templates.topic_post.evaluate(thingPubdate(thing.original_post)));
 		rendered_contents = rendered_contents.concat(thing.contents.map(function(sub){
 		    return templates.topic_post.evaluate(thingPubdate(sub))
 		}));
-		rendered_contents.push(templates.thing_end.evaluate(thing));
+
 	    }
+	    rendered_contents.push(templates.thing_end.evaluate(thing));
 	    $('things').update(rendered_contents.join(""));
 	    history.pushThing(thing);
 	    addLinkEvents();
