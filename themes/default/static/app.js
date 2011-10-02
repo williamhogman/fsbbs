@@ -261,10 +261,19 @@ $script.ready(
 	    var converter = Markdown.getSanitizingConverter();
 	    
 	    md.addEditor = (function(idpostfix){
+		if(!$("wmd-input"+idpostfix))
+		{
+		    return false;
+		    console.warn(idpostfix, "missing");
+		}
+		    
 		editor = new Markdown.Editor(converter,idpostfix);
 		editor.run();
+		return true;
 	    });
+	    
 	    md.addEditor("-newtopic");
+	    md.addEditor("-newpost");
 	    console.log("new topics added");
 	});
 
