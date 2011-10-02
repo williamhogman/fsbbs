@@ -1,10 +1,10 @@
 $script("http://cdnjs.cloudflare.com/ajax/libs/prototype/1.7.0.0/prototype.js","ptype");
-
+$script("/s/templates.js","templates");
 $script(["Markdown.Converter.js","Markdown.Sanitizer.js","Markdown.Editor.js"].map(function(v){
     return "/j/vendor/pagedown/"+v;
 }),"markdown");
 $script.ready(
-    "ptype",
+    ["templates","ptype"],
     function(){
 	console.log("loading fsbbs js");
 	var api,remote,nearestAttribute,forumLinkClicked,history,addLinkEvents;
@@ -143,30 +143,7 @@ $script.ready(
 	
 	
 
-	templates = {
-	    category_topic: new Template('<article data-id="#{id}"><a href="/t/#{id}.html"><h3>#{title}</h3></a>'+
-					 'Topic created by <a href="/u/#{original_post.poster_uid}">'+
-					 '#{original_post.poster_name}</a>&nbsp;'+
-					 '<time timedate="#{original_post.pubdate}">'+
-					 '#{original_post.pubdate_human}</time>'+
-					 '<div class="clearfix"></div></article>'),
-	    thing_start: new Template('<article class="thing thing-#{type}" data-id="#{id}"><header>'+
-					'<a rel="self"><h2>#{title}</h2></a>'+
-					'</header>'),
-	    topic_post: new Template('<article data-id="#{id}"><header>'+
-				     'Posted by <a data-id="3" href="/u/#{poster_uid}.html">#{poster_name}</a>&nbsp;'+
-				     '<time datetime="#{pubdate}">#{pubdate_human}</time>'+
-				     '</header>'+ 
-				     '<div>#{text}</div>'+
-				     '</article>'
-				    ),
-	    topic_op: new Template('<p>Topic created by <a data-id="3" href="/u/3.html">william</a>&nbsp;'+
-				   '<time datetime="#{pubdate}">#{pubdate_human}</time></p>'+
-				   '<div class="op">#{text}</div>'
-				  ),
 
-	    thing_end: new Template("</article>")
-	};
 
 	isoToDate = function(d){
 	    return new Date(Date.parse(d));
