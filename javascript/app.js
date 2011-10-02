@@ -11,6 +11,13 @@ $script.ready(
 	api = window.fsbbs = {};	
 
 	api.history = history = function(){
+	    /** 
+	     *  Interface to the HTML5 history api, if there is none we do nothing
+	     *  Handles all onpopstates events
+	     * 
+	     *  Public memebers
+	     *  pushThing(thing) - pushes a thing onto the history
+	     */
 	    
 	    var r = {};
 	    window.onpopstate = function(event){
@@ -24,11 +31,11 @@ $script.ready(
 
 		}
 	    };
-	    var e = function(){};
-	    var push = (window.history.pushState ? window.history.pushState.bind(window.history) : e);
-	    var replace = (window.history.replaceState ? window.history.replaceState.bind(window.history) : e);
+	    var e = function(){},
+	    push = (window.history.pushState ? window.history.pushState.bind(window.history) : e),
+	    replace = (window.history.replaceState ? window.history.replaceState.bind(window.history) : e),
 
-	    var HistoryState = Class.create({
+	    HistoryState = Class.create({
 		initialize: function(o){
 		    this.wrapped = o;
 		    // get for how long this resource has been stored
@@ -41,9 +48,8 @@ $script.ready(
 			this.wrapped.onHistoryEnter(this.stored);
 		    }
 		}
-	    });
-	    
-	    var ThingHistoryState = Class.create(HistoryState,
+	    }),
+	    ThingHistoryState = Class.create(HistoryState,
 	    {
 		initialize: function($super,o){
 		    $super(o);
@@ -52,9 +58,8 @@ $script.ready(
 		enter: function($super){
 		    renderThing(this.wrapped);
 		}
-	    });
-
-	    var FirstHistoryState = Class.create(HistoryState,
+	    }),
+	    FirstHistoryState = Class.create(HistoryState,
             {
 		initialize: function($super,o)
 		{
