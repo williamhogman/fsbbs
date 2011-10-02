@@ -7,7 +7,7 @@ $script.ready(
     ["templates","ptype"],
     function(){
 	console.log("loading fsbbs js");
-	var api,remote,nearestAttribute,forumLinkClicked,history,addLinkEvents;
+	var api,remote,nearestAttribute,forumLinkClicked,history,addLinkEvents,updateInteractions;
 	api = window.fsbbs = {};	
 
 	api.history = history = function(){
@@ -178,6 +178,27 @@ $script.ready(
 	    }
 	    return res;
 	};
+
+	updateInteractions = function(thing){
+	    var frm;
+	    if(thing.type == "category")
+	    {
+		frm = templates.form_new_topic.evaluate(thing);
+		$("interactions").update(frm);
+		md.addEditor("-newtopic");
+		
+	    } else if (thing.type == "topic")
+	    {
+		frm = templates.form_new_post.evaluate(thing);
+		$("interactions").update(frm);
+		md.addEditor("-newpost");
+		
+	    } else // maches none don't do 
+	    {
+		$("interactions").update("");
+	    }
+
+	};
 	
 	loadThing = function(tid){
 	    var success = function(response){
@@ -210,6 +231,7 @@ $script.ready(
 	    $('things').update(rendered_contents.join(""));
 	    history.pushThing(thing);
 	    addLinkEvents();
+	    updateInteractions(thing);
 	};
 
 	forumLinkClicked = function(ev){
@@ -223,7 +245,7 @@ $script.ready(
 	};
 	
 	addLinkEvents = (function(){
-	    $$("article[data-id] a").each(function(item){
+    $$("article[data-id] a").each(function(item){
 		item.observe("click",forumLinkClicked);
 	    });
 	});
