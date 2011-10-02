@@ -154,7 +154,7 @@ $script.ready(
 					'<a rel="self"><h2>#{title}</h2></a>'+
 					'</header>'),
 	    topic_post: new Template('<article data-id="#{id}"><header>'+
-				     'Posted by <a data-id="3" href="/u/3.html">william</a>&nbsp;'+
+				     'Posted by <a data-id="3" href="/u/#{poster_uid}.html">#{poster_name}</a>&nbsp;'+
 				     '<time datetime="#{pubdate}">#{pubdate_human}</time>'+
 				     '</header>'+ 
 				     '<div>#{text}</div>'+
@@ -277,7 +277,7 @@ $script.ready(
 		return true;
 	    });
             md.toHTML = function(text){
-		converter.makeHTML(text);
+		return converter.makeHtml(text);
 	    };
 		      
 	    
