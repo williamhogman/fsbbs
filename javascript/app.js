@@ -139,16 +139,6 @@ $script.ready(
 
 	})();
 
-	 
-	
-	
-
-
-
-	isoToDate = function(d){
-	    return new Date(Date.parse(d));
-	};
-
 	parseThing = function(thing){
 	    if (thing.original_post && thing.original_post.pubdate)
 	    {
