@@ -39,4 +39,5 @@ class Application(cyclone.web.Application):
         settings = dict(
         )
         handlers.append((r"/s/(.*)",cyclone.web.StaticFileHandler,{"path": "themes/default/static/"}))
+        handlers.append((r"/j/(.*)",cyclone.web.StaticFileHandler,{"path": "javascript/" }))
         cyclone.web.Application.__init__(self, handlers, **settings)
