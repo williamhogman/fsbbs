@@ -183,6 +183,11 @@ $script.ready(
 		thing.pubdate = new Date(Date.parse(thing.pubdate));
 		thing.pubdate_human = humanise.date(thing.pubdate);
 	    }
+
+	    
+	    if(thing.text){
+		thing.text = md.toHTML(thing.text);
+	    }
 	    return thing;
 	};
 
@@ -225,7 +230,7 @@ $script.ready(
 	    {
 		rendered_contents.push(templates.topic_op.evaluate(thingPubdate(thing.original_post)));
 		rendered_contents = rendered_contents.concat(thing.contents.map(function(sub){
-		    return templates.topic_post.evaluate(thingPubdate(sub))
+		    return templates.topic_post.evaluate(thingPubdate(sub));
 		}));
 
 	    }
@@ -240,7 +245,7 @@ $script.ready(
 	    if(id != null)
 	    {
 		ev.stop();
-		loadThing(id)
+		loadThing(id);
 
 	    }
 	};
@@ -271,6 +276,10 @@ $script.ready(
 		editor.run();
 		return true;
 	    });
+            md.toHTML = function(text){
+		converter.makeHTML(text);
+	    };
+		      
 	    
 	    md.addEditor("-newtopic");
 	    md.addEditor("-newpost");
