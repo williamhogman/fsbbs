@@ -151,11 +151,15 @@ $script.ready(
 					'</header>'),
 	    topic_post: new Template('<article data-id="#{id}"><header>'+
 				     'Posted by <a data-id="3" href="/u/3.html">william</a>&nbsp;'+
-				     '<time pubdate="" datetime="2011-10-01T21:01:01.050000Z">Today 21:01</time>'+
+				     '<time datetime="#{pubdate}">#{pubdate_human}</time>'+
 				     '</header>'+ 
 				     '<div>#{text}</div>'+
 				     '</article>'
 				    ),
+	    topic_op: new Template('<p>Topic created by <a data-id="3" href="/u/3.html">william</a>&nbsp;'+
+				   '<time datetime="#{pubdate}">#{pubdate_human}</time></p>'+
+				   '<div class="op">#{text}</div>'
+				  ),
 
 	    thing_end: new Template("</article>")
 	};
@@ -170,6 +174,10 @@ $script.ready(
 		thing.original_post.pubdate = new Date(Date.parse(thing.original_post.pubdate));
 		thing.original_post.pubdate_human = humanise.date(thing.original_post.pubdate);
 		
+	    } else if(thing.pubdate)
+	    {
+		thing.pubdate = new Date(Date.parse(thing.pubdate));
+		thing.pubdate_human = humanise.date(thing.pubdate);
 	    }
 	    return thing;
 	};
@@ -211,7 +219,7 @@ $script.ready(
 
 	    } else if (thing.type == "topic")
 	    {
-		rendered_contents.push(templates.topic_post.evaluate(thingPubdate(thing.original_post)));
+		rendered_contents.push(templates.topic_op.evaluate(thingPubdate(thing.original_post)));
 		rendered_contents = rendered_contents.concat(thing.contents.map(function(sub){
 		    return templates.topic_post.evaluate(thingPubdate(sub))
 		}));
