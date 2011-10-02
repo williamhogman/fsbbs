@@ -149,7 +149,7 @@ $script.ready(
 	    return new Date(Date.parse(d));
 	};
 
-	thingPubdate = function(thing){
+	parseThing = function(thing){
 	    if (thing.original_post && thing.original_post.pubdate)
 	    {
 		thing.original_post.pubdate = new Date(Date.parse(thing.original_post.pubdate));
@@ -195,19 +195,19 @@ $script.ready(
 	
 	renderThing = function(thing){
 	    var rendered_contents;
-	    rendered_contents = [templates.thing_start.evaluate(thingPubdate(thing))];
+	    rendered_contents = [templates.thing_start.evaluate(parseThing(thing))];
 	    if(thing.type == "category")
 	    {
 
 		rendered_contents = rendered_contents.concat(thing.contents.map(function(sub){
-		    return templates.category_topic.evaluate(thingPubdate(sub));
+		    return templates.category_topic.evaluate(parseThing(sub));
 		}));
 
 	    } else if (thing.type == "topic")
 	    {
-		rendered_contents.push(templates.topic_op.evaluate(thingPubdate(thing.original_post)));
+		rendered_contents.push(templates.topic_op.evaluate(parseThing(thing.original_post)));
 		rendered_contents = rendered_contents.concat(thing.contents.map(function(sub){
-		    return templates.topic_post.evaluate(thingPubdate(sub));
+		    return templates.topic_post.evaluate(parseThing(sub));
 		}));
 
 	    }
