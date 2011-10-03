@@ -81,8 +81,19 @@ class LogoutHandler(BaseHandler):
         self.clear_cookie("s")
         #todo: invalidate the login cookie
         self.redirect("/index.html")
+
+from ..output import json_out
+class LogoutJSONHandler(BaseHandler):
+    def get(self):
+        self.clear_cookie("s")
+        self.set_header("Content-Type","application/json")
+        #todo: invalidate the actual cookie
+        self.finish(json_out.serialize({"success": True}))
         
 import application
+
+application.addHandler(r"/api/logout.json",LogoutJSONHandler)
+
 application.addHandler(r"/login.html",LoginHandler)
 application.addHandler(r"/logout.html",LogoutHandler)
 application.addHandler(r"/register.html",RegisterHandler)
