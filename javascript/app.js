@@ -7,7 +7,7 @@ $script.ready(
     ["templates","ptype"],
     function(){
 	console.log("loading fsbbs js");
-	var api,remote,nearestAttribute,forumLinkClicked,history,addLinkEvents,updateInteractions;
+	var api,remote,nearestAttribute,forumLinkClicked,history,addLinkEvents,updateInteractions,auth;
 	api = window.fsbbs = {};	
 
 	api.history = history = function(){
@@ -101,6 +101,31 @@ $script.ready(
 	    return fns;
 	}();
 
+	api.auth = auth = function(){
+	    var loggedin = false,
+	    uid = null,
+	    r = {};
+	 
+	    
+	    r.setUser = function(userid){
+		if(userid > 0)
+		{
+		    uid = userid;
+		    loggedin = true;
+		    console.log("logged in as",userid);
+		} else {
+		    console.warn("Tried to set user to non positive value");
+		}
+	    };
+	    
+	    r.isLoggedIn = function(){
+		return loggedin;
+	    };
+
+	    r.setUser(window.initial_uid);
+	    return r;
+	}();
+
 	var humanise = {};
 	/* adapted from https://gist.github.com/colmjude  */
 	humanise.date = (function() {
@@ -180,6 +205,11 @@ $script.ready(
 	};
 
 	updateInteractions = function(thing){
+	    if(!auth.isLoggedIn())
+	    {
+		$('interactions').update("<p>You need to login in order to post</p>");
+		return;
+	    }
 	    var frm;
 	    if(thing.type == "category")
 	    {
