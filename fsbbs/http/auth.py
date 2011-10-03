@@ -84,7 +84,7 @@ class LogoutHandler(BaseHandler):
 
 from ..output import json_out
 class LogoutJSONHandler(BaseHandler):
-    def get(self):
+    def post(self):
         self.clear_cookie("s")
         self.set_header("Content-Type","application/json")
         #todo: invalidate the actual cookie
