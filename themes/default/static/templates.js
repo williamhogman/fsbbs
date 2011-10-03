@@ -37,4 +37,41 @@ $script.ready("ptype",function()
 	"</article>"
     );
 
+    _.form_new_topic = t(
+	'<form action="/new_topic" method="post">'+
+	    "<legend>Create topic</legend>"+
+	    '<input type="hidden" name="tid" value="#{id}" />'+
+	    '<div class="input">'+
+	    '<label for="title">Title</label>'+
+	    '<input class="largeinput" type="text" name="title" />'+
+	    '</div>'+
+	    '<div class="input wmd-panel">'+
+	    '<label for="text">Text</label>'+
+	    '<div id="wmd-button-bar-newtopic"></div>'+
+	    '<textarea class="wmd-input" id="wmd-input-newtopic" name="text"></textarea>'+
+	    '</div>'+
+	    '<div id="wmd-preview-newtopic" class="wmd-panel wmd-preview"></div>'+
+	    '<div class="actions">'+
+	    '<input type="submit" value="Post" />'+
+	    '</div>'+
+	    '</form>'
+    );
+
+    _.form_new_post = t(
+	'<form action="/new_post" method="post">'+
+	    '<legend>Reply to this topic</legend>'+
+	    '<input type="hidden" value="#{id}" name="tid" />'+
+	    '<div class="input wmd-panel">'+
+	    '<label for="text">Text</label>'+
+	    '<div id="wmd-button-bar-newpost"></div>'+
+	    '<textarea class="wmd-input" name="text" id="wmd-input-newpost"></textarea>'+
+	    '</div>'+
+	    '<div id="wmd-preview-newpost" class="wmd-preview">'+
+	    '</div>'+
+	    '<div class="actions">'+
+	    '<input type="submit" value="Post" />'+
+	    '</div>'+
+	    '</form>'
+    );
+
 });

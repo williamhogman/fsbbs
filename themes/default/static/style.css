@@ -336,6 +336,22 @@ h3 {
       margin-left: 50%;
    }
 
+   /* we can't fit the wmd panel side by side on this screen size */
+   .wmd-preview, .wmd-panel
+   {
+      width: 50%;
+   }
+
+   .wmd-input
+   {
+      width: 100%;
+   }
+
+   .actions
+   {
+    
+   }
+
 
 
    .medinput
@@ -430,6 +446,28 @@ h3 {
   #twoway .wrapper:first-child {
     margin-left: 25%;
   }
+   
+
+   .wmd-preview, .wmd-panel
+   {
+      float: left;
+      width: 25%;
+   }
+
+   .wmd-preview
+   {
+      margin: 4em 0 0 6.25%;
+   }
+
+   .wmd-input
+   {
+      width: 100%;
+   }
+
+   .actions
+   {
+      clear: both;
+   }
 
    
    .medinput
