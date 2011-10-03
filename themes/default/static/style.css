@@ -245,6 +245,12 @@ textarea,.largeinput
 {
     border-bottom: 1px dotted;
 }
+
+.modalWindow
+{
+   width: 50%;
+   left: 25%;
+}
    
 
 h1, h2 {
@@ -347,11 +353,6 @@ h3 {
       width: 100%;
    }
 
-   .actions
-   {
-    
-   }
-
 
 
    .medinput
@@ -364,14 +365,16 @@ h3 {
       width: 50%;
    }
 
-   .actions
-   {
-      margin-left: 50%;
-   }
 
    .thing-category article h3
    {
        width: 50%;
+   }
+
+   .modalWindow
+   {
+      width: 50%;
+      left: 25%;
    }
 }
 /* @media screen and (min-width: 888px) */
@@ -467,6 +470,7 @@ h3 {
    .actions
    {
       clear: both;
+      margin-left: 25%;
    }
 
    
@@ -490,7 +494,12 @@ h3 {
    {
        width: 25%;
    }
-   
+
+   .modalWindow
+   {
+      width: 25%;
+      left: 37.5%;
+   }
 }
 /* @media screen and (min-width: 2080px) */
 @media screen and (min-width: 130em) {
@@ -748,4 +757,59 @@ nav.listing ul
 	font-family: trebuchet MS, helvetica, sans-serif;
 	font-size: 0.8em;
 	font-weight: bold;
+}
+
+
+
+/** 
+ *Modals 
+ */
+
+.modalWindow {
+   display: block;
+   margin: 0 auto;
+
+   position: fixed;
+
+   top: -310px;
+
+   
+   padding: 20px 20px 20px 20px;
+   border: solid 1px #999;
+   background: -webkit-gradient(linear, left top, left bottom, from(rgb(255,255,255)), to(rgb(230,230,230)));
+   -webkit-box-shadow: 0px 3px 6px rgba(0,0,0,0.25);
+   -webkit-border-bottom-left-radius: 6px;
+   -webkit-border-bottom-right-radius: 6px;
+   -webkit-transition: -webkit-transform 0.50s ease-out;
+   -webkit-transform: translateY(-570px);
+   -moz-transform: translatey(-570px);
+}
+
+.modalWindow.show {
+
+   -webkit-transform: translateY(400px);
+   -moz-transform: translatey(400px);
+}
+
+
+#modal-login h3
+{
+   margin: 0 1em 0 0;
+}
+
+#modal-login p
+{
+   margin: 0 0 2em 0;
+}
+
+
+
+
+label {
+   min-width: 6em;
+   float: left;
+}
+
+.input {
+   margin-bottom: 0.5em;
 }

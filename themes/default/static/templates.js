@@ -1,7 +1,7 @@
-$script.ready("ptype",function()
-{
+$script.ready("ptype",function(){
     var _ = window.templates = {},
     t = function(a){return new Template(a);};
+
 
     _.category_topic = t(
 	'<article data-id="#{id}"><a href="/t/#{id}.html"><h3>#{title}</h3></a>'+
@@ -72,6 +72,24 @@ $script.ready("ptype",function()
 	    '<input type="submit" value="Post" />'+
 	    '</div>'+
 	    '</form>'
+    );
+
+    _.status_guest = t(
+	'<span>You are not logged in.</span>'
+    );
+
+    _.status_user = t(
+	"<span>Welcome back #{username}</span>"
+    );
+
+    _.modal_login_title = t(
+	"<h3>Login</h3>"+
+	'<p>Login in with your username and password</p>'
+    );
+    _.modal_login = t(
+	'<label for="username">Username</label><input type="text" placeholder="Username" name="username" />'+
+	    '<div class="input"><label for="password">Password</label> <input type="password" placeholder="Password" name="password" /></div>'+
+	    '<div class="actions"><input type="submit" value="Login" /></div>'
     );
 
 });

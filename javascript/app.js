@@ -86,9 +86,10 @@ $script.ready(
 	api.remote = remote = function(){
 	    var calls = 
 		{
-		    "get_thing": {url: "/api/get_thing.json", method: "GET"}
-		};
-	    var fns = $H();
+		    "get_thing": {url: "/api/get_thing.json", method: "GET"},
+		    "logout": {url: "/api/logout.json", method: "POST"}
+		},
+	    fns = $H();
 	    $H(calls).each(function(p){
 		// get our name and defaults
 		var name= p[0],def = $H(p[1]);
@@ -104,8 +105,70 @@ $script.ready(
 	api.auth = auth = function(){
 	    var loggedin = false,
 	    uid = null,
+	    username = null,
 	    r = {};
-	 
+
+	    r.ui = function(){
+		var e={},
+		loginbar = $$(".loginbar")[0];
+		e.update = function(){
+		    var msg;
+		    if(loggedin) {
+			msg = templates.status_user.evaluate({username: username});
+			
+			// yeah reverse hungarian notation; 
+			var btn_logout = new Element("a",{'class': 'button logout-btn', href: "#"});
+			btn_logout.update("Logout");
+			btn_logout.observe("click",function(){
+					       r.doLogout();
+					   });
+
+			loginbar.update(msg).insert(btn_logout);
+
+		    } else {
+			msg = templates.status_guest.evaluate({username: username});
+			var btn_login = new Element("a",{'class': 'button login-btn', href: "#"});
+			btn_login.update("Login");
+			btn_login.observe("click",showLoginModal);
+			
+			var btn_reg = new Element("a",{'class': 'button register-btn', href: "#"});
+			btn_reg.update("Register");
+			btn_reg.observe("click",showRegisterModal);
+
+			loginbar.update(msg).insert(btn_login).insert(btn_reg);
+		    }
+		};
+
+
+		function showLoginModal()
+		{
+		    var modalBox = new Element("div",{'class': 'modalWindow','id': 'modal-login' }),
+		    form = new Element("form");
+		    form.insert(templates.modal_login_title.evaluate());
+		    form.insert(templates.modal_login.evaluate());
+
+		    modalBox.insert(form);
+		    $(document.body).insert(modalBox);
+		    // the slight delay will ensure that the transform is done
+		    (function(){modalBox.addClassName("show");}).defer();
+		}
+
+		function showRegisterModal()
+		{
+		    
+		}
+		
+		return e;
+            }();
+	    
+	    r.doLogout = function(cb){
+		remote.logout({onSuccess: function(){
+				   loggedin = False;
+				   uid = null;
+				   if(cb) cb();
+				   r.ui.update();
+			       }});
+	    };
 	    
 	    r.setUser = function(userid){
 		if(userid > 0)
@@ -310,5 +373,5 @@ $script.ready(
 	    console.log("new topics added");
 	});
 
-	
+	setTimeout(auth.ui.update,3);
     });
