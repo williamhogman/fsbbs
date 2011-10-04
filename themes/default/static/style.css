@@ -807,3 +807,12 @@ label {
    float: left;
 }
 
+.error
+{
+   padding: 0.5em 0; 
+   margin: -0.5em 0 0.5em;
+   border-radius: 5px;
+   background: #FAE5E3;
+   background: rgba(250, 229, 227, 1);
+}
+

@@ -151,11 +151,55 @@ $script.ready(
 		    $(document.body).insert(modalBox);
 		    // the slight delay will ensure that the transform is done
 		    (function(){modalBox.addClassName("show");}).defer();
+
+		    form.observe("submit",function(ev){
+				     ev.stop();
+
+				     var t = this,
+				     username = t.username.getValue().trim(),
+				     password = t.password.getValue(),
+				     passedValidation = true;
+				     
+				     t.descendants().each(function(v){
+							      // dom writes are expensive as hell
+							      if(v.hasClassName("error"))
+								  v.removeClassName("error");			
+							   });
+				     
+				     if(username == "")
+				     {
+					 passedValidation = false;
+					 t.username.up().addClassName("error");
+				     }
+				     
+				     if(password == "")
+				     {
+					 passedValidation = false;
+					 t.password.up().addClassName("error");
+				     }
+				     
+				     if(!passedValidation)
+				     {
+					 return;
+				     }
+
+				 });
 		}
 
 		function showRegisterModal()
 		{
+		    var modalBox = new Element("div",{'class': 'modalWindow', 'id': 'modal-register'});
+		    form = new Element("form");
+		    form.insert(templates.modal_register_title.evaluate());
+		    form.insert(templates.modal_register.evaluate());
 		    
+		    modalBox.insert(form);
+		    $(document.body).insert(modalBox);
+		    
+		    form.observe("submit",function(){
+				     
+				 });
+		    (function(){modalBox.addClassName("show");}).defer();
 		}
 		
 		return e;

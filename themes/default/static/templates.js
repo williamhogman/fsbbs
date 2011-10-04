@@ -86,10 +86,23 @@ $script.ready("ptype",function(){
 	"<h3>Login</h3>"+
 	'<p>Login in with your username and password</p>'
     );
+
     _.modal_login = t(
 	'<div class="input"><label for="username">Username</label><input type="text" placeholder="Username" name="username" /></div>'+
 	    '<div class="input"><label for="password">Password</label> <input type="password" placeholder="Password" name="password" /></div>'+
 	    '<div class="actions"><input type="submit" value="Login" /></div>'
     );
 
+    _.modal_register_title = t(
+	"<h3>Register</h3>"+
+	    '<p>Register for post access to the forum</p>'
+    );
+
+    _.modal_register = t(
+	'<div class="input"><label for="username">Username</label><input type="text" placeholder="Username" name="username" /></div>'+
+	    '<div class="input"><label for="password">Password</label> <input type="password" placeholder="Password" name="password" /></div>'+
+	    '<div class="actions"><input type="submit" value="Register" /></div>'
+    );
+
+		  
 });
