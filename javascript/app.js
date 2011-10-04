@@ -87,7 +87,8 @@ $script.ready(
 	    var calls = 
 		{
 		    "get_thing": {url: "/api/get_thing.json", method: "GET"},
-		    "logout": {url: "/api/logout.json", method: "POST"}
+		    "logout": {url: "/api/logout.json", method: "POST"},
+		    "login": {url: "/api/login.json", method: "POST"}
 		},
 	    fns = $H();
 	    $H(calls).each(function(p){
@@ -182,6 +183,8 @@ $script.ready(
 				     {
 					 return;
 				     }
+				     
+				     
 
 				 });
 		}
