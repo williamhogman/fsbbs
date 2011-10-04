@@ -372,6 +372,8 @@ $script.ready(
 	    md.addEditor("-newpost");
 	    console.log("new topics added");
 	});
-
-	setTimeout(auth.ui.update,3);
+	
+	document.observe("dom:loaded",function(){
+			     setTimeout(auth.ui.update,3);
+			 });
     });
