@@ -84,7 +84,8 @@ $script.ready("ptype",function(){
 
     _.modal_login_title = t(
 	"<h3>Login</h3>"+
-	'<p>Login in with your username and password</p>'
+	'<p>Login in with your username and password</p>'+
+	    '<div class="infobox"></div>'
     );
 
     _.modal_login = t(
@@ -95,7 +96,8 @@ $script.ready("ptype",function(){
 
     _.modal_register_title = t(
 	"<h3>Register</h3>"+
-	    '<p>Register for post access to the forum</p>'
+	    '<p>Register for post access to the forum</p>'+
+	    '<div class="infobox"></div>'
     );
 
     _.modal_register = t(

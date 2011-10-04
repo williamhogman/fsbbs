@@ -159,7 +159,10 @@ $script.ready(
 				     var t = this,
 				     username = t.username.getValue().trim(),
 				     password = t.password.getValue(),
-				     passedValidation = true;
+				     passedValidation = true,
+				     infobox = t.down(".infobox");
+				     
+				     
 				     
 				     t.descendants().each(function(v){
 							      // dom writes are expensive as hell
@@ -171,21 +174,47 @@ $script.ready(
 				     {
 					 passedValidation = false;
 					 t.username.up().addClassName("error");
+					 infobox.update("<p>Please fill in all the fields</p>");
 				     }
 				     
 				     if(password == "")
 				     {
 					 passedValidation = false;
 					 t.password.up().addClassName("error");
+					 infobox.update("<p>Please fill in all the fields</p>");
 				     }
 				     
 				     if(!passedValidation)
 				     {
 					 return;
 				     }
+				     infobox.update("");
 				     
+				     remote.login({parameters: {username: username,password:password},
+						  onSuccess: function(resp){
+						      var res = resp.responseJSON;
+						      if(res.status =="success")
+							  {
+							      r.setUser(res.uid,username);
+							      modalBox.removeClassName("show");
+							      // save some memory
+							      setTimeout(function(){modalBox.remove();},750);
+							  } else if (res.status=="invalid") {
+							      r.setUser(res.uid);
+							      t.up().removeClassName("show");
+							      // save some memory
+							      setTimeout(function(){modalBox.remove();},750);
+							  } else {
+							      t.password.clear().up().addClassName("error");
+							      infobox.update("<p>Incorrect username or password</p>");
+							  }
+						      
+						      e.update();
+						  },
+						  onFailure: function(resp){
+						      
+						  }});
 				     
-
 				 });
 		}
 
@@ -210,16 +239,17 @@ $script.ready(
 	    
 	    r.doLogout = function(cb){
 		remote.logout({onSuccess: function(){
-				   loggedin = False;
+				   loggedin = false;
 				   uid = null;
 				   if(cb) cb();
 				   r.ui.update();
 			       }});
 	    };
 	    
-	    r.setUser = function(userid){
+	    r.setUser = function(userid,uname){
 		if(userid > 0)
 		{
+		    username = uname;
 		    uid = userid;
 		    loggedin = true;
 		    console.log("logged in as",userid);
