@@ -93,13 +93,14 @@ class LoginJSONHandler(BaseHandler,SessionAuthMixin):
     def post(self):
         logged_in = yield self.verifySession()
         if logged_in:
-            self.finish(json_out.serialize({"status": "failure","msg": "Already logged in"}))
+            self.finish(json_out.serialize({"status": "invalid","msg": "Already logged in","uid": self.user.uid}))
             return
         username = self.get_argument("username")
         password = self.get_argument("password")
         auth = AuthService()
         res = yield auth.getChain("default").run({"username": username,"password": password})
 
+        self.set_header("Content-Type","application/json")
         if res.success:
             # if we've been asked to store a secret
             if 'set_session_secret' in res:
