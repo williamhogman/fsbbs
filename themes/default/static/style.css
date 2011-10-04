@@ -516,6 +516,11 @@ h3 {
    margin: 0 0 1em;
 }
 
+.loginbar .button
+{
+   float: right;
+}
+
 #msthead
 {
    border-bottom: 1px solid;
@@ -607,7 +612,7 @@ legend
    padding: 1em 0;
 }
 
-.actions input[type=submit] {
+.actions input[type=submit],.button {
   color: #ffffff;
   background-color: #0064cd;
   background-repeat: repeat-x;
@@ -633,10 +638,10 @@ legend
   -ms-transition: 0.1s linear all;
   -o-transition: 0.1s linear all;
   transition: 0.1s linear all;
-
+  text-decoration: none;
 }
 
-.actions input[type=submit]:hover
+.actions input[type=submit]:hover, .button:hover
 {
    background-position: 0 -15px;
    text-decoration: none;
@@ -776,7 +781,9 @@ nav.listing ul
    
    padding: 20px 20px 20px 20px;
    border: solid 1px #999;
+   background: #FFF;
    background: -webkit-gradient(linear, left top, left bottom, from(rgb(255,255,255)), to(rgb(230,230,230)));
+
    -webkit-box-shadow: 0px 3px 6px rgba(0,0,0,0.25);
    -webkit-border-bottom-left-radius: 6px;
    -webkit-border-bottom-right-radius: 6px;
