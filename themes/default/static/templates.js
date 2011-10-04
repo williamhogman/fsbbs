@@ -87,7 +87,7 @@ $script.ready("ptype",function(){
 	'<p>Login in with your username and password</p>'
     );
     _.modal_login = t(
-	'<label for="username">Username</label><input type="text" placeholder="Username" name="username" />'+
+	'<div class="input"><label for="username">Username</label><input type="text" placeholder="Username" name="username" /></div>'+
 	    '<div class="input"><label for="password">Password</label> <input type="password" placeholder="Password" name="password" /></div>'+
 	    '<div class="actions"><input type="submit" value="Login" /></div>'
     );

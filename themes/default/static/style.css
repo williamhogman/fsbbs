@@ -802,14 +802,8 @@ nav.listing ul
    margin: 0 0 2em 0;
 }
 
-
-
-
 label {
    min-width: 6em;
    float: left;
 }
 
-.input {
-   margin-bottom: 0.5em;
-}
