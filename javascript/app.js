@@ -7,7 +7,7 @@ $script.ready(
     ["templates","ptype"],
     function(){
 	console.log("loading fsbbs js");
-	var api,remote,nearestAttribute,forumLinkClicked,history,addLinkEvents,updateInteractions,auth;
+	var api,remote,nearestAttribute,forumLinkClicked,history,addLinkEvents,updateInteractions,auth,modal;
 	api = window.fsbbs = {};	
 
 	api.history = history = function(){
@@ -87,7 +87,9 @@ $script.ready(
 	    var calls = 
 		{
 		    "get_thing": {url: "/api/get_thing.json", method: "GET"},
-		    "logout": {url: "/api/logout.json", method: "POST"}
+		    "logout": {url: "/api/logout.json", method: "POST"},
+		    "login": {url: "/api/login.json", method: "POST"},
+		    "register": {url: "/api/register.json", method: "POST" }
 		},
 	    fns = $H();
 	    $H(calls).each(function(p){
@@ -102,6 +104,36 @@ $script.ready(
 	    return fns;
 	}();
 
+	api.modal = modal = function(){
+	    var r = {},
+	    openModals = [];
+	    r.ModalWindow = Class.create
+	    ({
+		 initialize: function(id){
+		     this.element = new Element("div",{'class': 'modalWindow', 'id': id});
+		 },
+		 show: function(cb){
+		     this.element.addClassName.bind(this.element).defer("show");
+		     if(cb){
+			 // this defer will be called after the addClassName call because of defer is just
+			 // queuing up things on the UI loop
+			 cb.defer();
+		     }
+			 
+		 },
+		 insert: function(elem){
+		     this.element.insert(elem);
+		 },
+		 hideAndDelete: function(){
+		     this.element.removeClassName("show");
+		     this.element.remove.delay(1);
+		 },
+		 addIntoDOM: function(){
+		     $(document.body).insert(this.element);
+		 }
+	     });
+	    return r;
+	}();
 	api.auth = auth = function(){
 	    var loggedin = false,
 	    uid = null,
@@ -142,15 +174,16 @@ $script.ready(
 
 		function showLoginModal()
 		{
-		    var modalBox = new Element("div",{'class': 'modalWindow','id': 'modal-login' }),
+		    //var modalBox = new Element("div",{'class': 'modalWindow','id': 'modal-login' }),
+		    var modalBox = new modal.ModalWindow('modal-login'),
 		    form = new Element("form");
 		    form.insert(templates.modal_login_title.evaluate());
 		    form.insert(templates.modal_login.evaluate());
 
 		    modalBox.insert(form);
-		    $(document.body).insert(modalBox);
-		    // the slight delay will ensure that the transform is done
-		    (function(){modalBox.addClassName("show");}).defer();
+		    modalBox.addIntoDOM();
+
+		    modalBox.show();
 
 		    form.observe("submit",function(ev){
 				     ev.stop();
@@ -158,7 +191,10 @@ $script.ready(
 				     var t = this,
 				     username = t.username.getValue().trim(),
 				     password = t.password.getValue(),
-				     passedValidation = true;
+				     passedValidation = true,
+				     infobox = t.down(".infobox");
+				     
+				     
 				     
 				     t.descendants().each(function(v){
 							      // dom writes are expensive as hell
@@ -170,36 +206,117 @@ $script.ready(
 				     {
 					 passedValidation = false;
 					 t.username.up().addClassName("error");
+					 infobox.update("<p>Please fill in all the fields</p>");
 				     }
 				     
 				     if(password == "")
 				     {
 					 passedValidation = false;
 					 t.password.up().addClassName("error");
+					 infobox.update("<p>Please fill in all the fields</p>");
 				     }
 				     
 				     if(!passedValidation)
 				     {
 					 return;
 				     }
-
+				     infobox.update("");
+				     
+				     remote.login({parameters: {username: username,password:password},
+						  onSuccess: function(resp){
+						      var res = resp.responseJSON;
+						      if(res.status =="success")
+							  {
+							      r.setUser(res.uid,username);
+							      modalBox.hideAndDelete();
+							  } else if (res.status=="invalid") {
+							      r.setUser(res.uid);
+							      modalBox.hideAndDelete();
+							  } else {
+							      t.password.clear().up().addClassName("error");
+							      infobox.update("<p>Incorrect username or password</p>");
+							  }
+						      
+						      e.update();
+						  },
+						  onFailure: function(resp){
+						      infobox.update("<p>Something went wrong...</p>");
+						  }});
+				     
 				 });
 		}
 
 		function showRegisterModal()
 		{
-		    var modalBox = new Element("div",{'class': 'modalWindow', 'id': 'modal-register'});
+		    var modalBox = new modal.ModalWindow("modal-register");
 		    form = new Element("form");
 		    form.insert(templates.modal_register_title.evaluate());
 		    form.insert(templates.modal_register.evaluate());
 		    
 		    modalBox.insert(form);
-		    $(document.body).insert(modalBox);
 		    
-		    form.observe("submit",function(){
+		    modalBox.addIntoDOM();
+		    
+		    modalBox.show();
+		    form.observe("submit",function(ev){
+				     ev.stop();
+				     var t = this,
+				     username = t.username.getValue().trim(),
+				     password = t.password.getValue(),
+				     passedValidation = true,
+				     infobox = t.down(".infobox");
+				     
+				     
+				     
+				     t.descendants().each(function(v){
+							      // dom writes are expensive as hell
+							      if(v.hasClassName("error"))
+								  v.removeClassName("error");			
+							   });
+				     
+				     if(username == "")
+				     {
+					 passedValidation = false;
+					 t.username.up().addClassName("error");
+					 infobox.update("<p>Please fill in all the fields</p>");
+				     }
+				     
+				     if(password == "")
+				     {
+					 passedValidation = false;
+					 t.password.up().addClassName("error");
+					 infobox.update("<p>Please fill in all the fields</p>");
+				     }
+				     
+				     if(!passedValidation)
+				     {
+					 return;
+				     }
+				     infobox.update("");
+
+				     remote.register({parameters: {username: username,password:password},
+						  onSuccess: function(resp){
+						      var res = resp.responseJSON;
+						      if(res.status =="success")
+							  {
+							      r.setUser(res.uid,res.username);
+							      modalBox.hideAndDelete();
+							  } else if (res.status=="invalid") {
+							      r.setUser(res.uid);
+							      modalBox.hideAndDelete();
+							  } else {
+							      infobox.update("<p>Username taken</p>");
+							  }
+						      
+						      e.update();
+						  },
+						  onFailure: function(resp){
+						      infobox.update("<p>Something went wrong...</p>");
+						  }});
+
 				     
 				 });
-		    (function(){modalBox.addClassName("show");}).defer();
+
 		}
 		
 		return e;
@@ -207,16 +324,17 @@ $script.ready(
 	    
 	    r.doLogout = function(cb){
 		remote.logout({onSuccess: function(){
-				   loggedin = False;
+				   loggedin = false;
 				   uid = null;
 				   if(cb) cb();
 				   r.ui.update();
 			       }});
 	    };
 	    
-	    r.setUser = function(userid){
+	    r.setUser = function(userid,uname){
 		if(userid > 0)
 		{
+		    username = uname;
 		    uid = userid;
 		    loggedin = true;
 		    console.log("logged in as",userid);

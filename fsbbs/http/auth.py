@@ -42,6 +42,9 @@ class LoginHandler(BaseHandler,SessionAuthMixin):
                                       self)
         
 
+
+
+
 class RegisterHandler(BaseHandler,SessionAuthMixin):
     @defer.inlineCallbacks
     def get(self):
@@ -83,6 +86,57 @@ class LogoutHandler(BaseHandler):
         self.redirect("/index.html")
 
 from ..output import json_out
+
+class RegisterJSONHandler(BaseHandler,SessionAuthMixin):
+    @defer.inlineCallbacks
+    def post(self):
+        logged_in = yield self.verifySession()
+        if logged_in:
+            self.finish(json_out.serialize({"status": "invalid","uid": self.user.uid}))
+            return
+        
+        username = self.get_argument("username")
+        password = self.get_argument("password")
+        
+        auth = AuthService()
+        res = yield auth.getChain("register").run({"username": username,"new_password": password})
+
+        self.set_header("Content-Type","application/json")
+        if res.success:
+            if 'set_session_secret' in res:
+                self.set_cookie("s",res['set_session_secret'])
+
+            self.finish(json_out.serialize({"status": "success", "uid": res.uid, "username": username.lower()}))
+        else:
+            self.finish(json_out.serialize({"status": "failure"}))
+            return
+                        
+        
+
+class LoginJSONHandler(BaseHandler,SessionAuthMixin):
+    @defer.inlineCallbacks
+    def post(self):
+        logged_in = yield self.verifySession()
+        if logged_in:
+            self.finish(json_out.serialize({"status": "invalid","uid": self.user.uid}))
+            return
+        username = self.get_argument("username")
+        password = self.get_argument("password")
+        auth = AuthService()
+        res = yield auth.getChain("default").run({"username": username,"password": password})
+
+        self.set_header("Content-Type","application/json")
+        if res.success:
+            # if we've been asked to store a secret
+            if 'set_session_secret' in res:
+                self.set_cookie("s",res['set_session_secret'])
+
+            self.finish(json_out.serialize({"status": "success","msg": "Logged in", "uid": res.uid}))
+        else:
+            self.finish(json_out.serialize({"status": "failure","msg": "Incorrect credentials"}))
+        
+            
+
 class LogoutJSONHandler(BaseHandler):
     def post(self):
         self.clear_cookie("s")
@@ -93,7 +147,8 @@ class LogoutJSONHandler(BaseHandler):
 import application
 
 application.addHandler(r"/api/logout.json",LogoutJSONHandler)
-
+application.addHandler(r"/api/login.json",LoginJSONHandler)
+application.addHandler(r"/api/register.json",RegisterJSONHandler)
 application.addHandler(r"/login.html",LoginHandler)
 application.addHandler(r"/logout.html",LogoutHandler)
 application.addHandler(r"/register.html",RegisterHandler)
