@@ -7,7 +7,7 @@ $script.ready(
     ["templates","ptype"],
     function(){
 	console.log("loading fsbbs js");
-	var api,remote,nearestAttribute,forumLinkClicked,history,addLinkEvents,updateInteractions,auth;
+	var api,remote,nearestAttribute,forumLinkClicked,history,addLinkEvents,updateInteractions,auth,modal;
 	api = window.fsbbs = {};	
 
 	api.history = history = function(){
@@ -103,6 +103,36 @@ $script.ready(
 	    return fns;
 	}();
 
+	api.modal = modal = function(){
+	    var r = {},
+	    openModals = [];
+	    r.ModalWindow = Class.create
+	    ({
+		 initialize: function(id){
+		     this.element = new Element("div",{'class': 'modalWindow', 'id': id});
+		 },
+		 show: function(cb){
+		     this.element.addClassName.bind(this.element).defer("show");
+		     if(cb){
+			 // this defer will be called after the addClassName call because of defer is just
+			 // queuing up things on the UI loop
+			 cb.defer();
+		     }
+			 
+		 },
+		 insert: function(elem){
+		     this.element.insert(elem);
+		 },
+		 hideAndDelete: function(){
+		     this.element.removeClassName("show");
+		     this.element.remove.delay(1);
+		 },
+		 addIntoDOM: function(){
+		     $(document.body).insert(this.element);
+		 }
+	     });
+	    return r;
+	}();
 	api.auth = auth = function(){
 	    var loggedin = false,
 	    uid = null,
@@ -143,15 +173,16 @@ $script.ready(
 
 		function showLoginModal()
 		{
-		    var modalBox = new Element("div",{'class': 'modalWindow','id': 'modal-login' }),
+		    //var modalBox = new Element("div",{'class': 'modalWindow','id': 'modal-login' }),
+		    var modalBox = new modal.ModalWindow('modal-login'),
 		    form = new Element("form");
 		    form.insert(templates.modal_login_title.evaluate());
 		    form.insert(templates.modal_login.evaluate());
 
 		    modalBox.insert(form);
-		    $(document.body).insert(modalBox);
-		    // the slight delay will ensure that the transform is done
-		    (function(){modalBox.addClassName("show");}).defer();
+		    modalBox.addIntoDOM();
+
+		    modalBox.show();
 
 		    form.observe("submit",function(ev){
 				     ev.stop();
@@ -196,14 +227,10 @@ $script.ready(
 						      if(res.status =="success")
 							  {
 							      r.setUser(res.uid,username);
-							      modalBox.removeClassName("show");
-							      // save some memory
-							      setTimeout(function(){modalBox.remove();},750);
+							      modalBox.hideAndDelete();
 							  } else if (res.status=="invalid") {
 							      r.setUser(res.uid);
-							      t.up().removeClassName("show");
-							      // save some memory
-							      setTimeout(function(){modalBox.remove();},750);
+							      modalBox.hideAndDelete();
 							  } else {
 							      t.password.clear().up().addClassName("error");
 							      infobox.update("<p>Incorrect username or password</p>");
@@ -212,7 +239,7 @@ $script.ready(
 						      e.update();
 						  },
 						  onFailure: function(resp){
-						      
+						      infobox.update("<p>Something went wrong...</p>");
 						  }});
 				     
 				 });
@@ -220,18 +247,20 @@ $script.ready(
 
 		function showRegisterModal()
 		{
-		    var modalBox = new Element("div",{'class': 'modalWindow', 'id': 'modal-register'});
+		    var modalBox = new modal.ModalWindow("modal-register");
 		    form = new Element("form");
 		    form.insert(templates.modal_register_title.evaluate());
 		    form.insert(templates.modal_register.evaluate());
 		    
 		    modalBox.insert(form);
-		    $(document.body).insert(modalBox);
 		    
+		    modalBox.addIntoDOM();
+		    
+		    modalBox.show();
 		    form.observe("submit",function(){
-				     
+				     ev.stop();
 				 });
-		    (function(){modalBox.addClassName("show");}).defer();
+
 		}
 		
 		return e;
