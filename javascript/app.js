@@ -88,7 +88,8 @@ $script.ready(
 		{
 		    "get_thing": {url: "/api/get_thing.json", method: "GET"},
 		    "logout": {url: "/api/logout.json", method: "POST"},
-		    "login": {url: "/api/login.json", method: "POST"}
+		    "login": {url: "/api/login.json", method: "POST"},
+		    "register": {url: "/api/register.json", method: "POST" }
 		},
 	    fns = $H();
 	    $H(calls).each(function(p){
@@ -257,8 +258,63 @@ $script.ready(
 		    modalBox.addIntoDOM();
 		    
 		    modalBox.show();
-		    form.observe("submit",function(){
+		    form.observe("submit",function(ev){
 				     ev.stop();
+				     var t = this,
+				     username = t.username.getValue().trim(),
+				     password = t.password.getValue(),
+				     passedValidation = true,
+				     infobox = t.down(".infobox");
+				     
+				     
+				     
+				     t.descendants().each(function(v){
+							      // dom writes are expensive as hell
+							      if(v.hasClassName("error"))
+								  v.removeClassName("error");			
+							   });
+				     
+				     if(username == "")
+				     {
+					 passedValidation = false;
+					 t.username.up().addClassName("error");
+					 infobox.update("<p>Please fill in all the fields</p>");
+				     }
+				     
+				     if(password == "")
+				     {
+					 passedValidation = false;
+					 t.password.up().addClassName("error");
+					 infobox.update("<p>Please fill in all the fields</p>");
+				     }
+				     
+				     if(!passedValidation)
+				     {
+					 return;
+				     }
+				     infobox.update("");
+
+				     remote.register({parameters: {username: username,password:password},
+						  onSuccess: function(resp){
+						      var res = resp.responseJSON;
+						      if(res.status =="success")
+							  {
+							      r.setUser(res.uid,res.username);
+							      modalBox.hideAndDelete();
+							  } else if (res.status=="invalid") {
+							      r.setUser(res.uid);
+							      modalBox.hideAndDelete();
+							  } else {
+							      infobox.update("<p>Username taken</p>");
+							  }
+						      
+						      e.update();
+						  },
+						  onFailure: function(resp){
+						      infobox.update("<p>Something went wrong...</p>");
+						  }});
+
+				     
 				 });
 
 		}
