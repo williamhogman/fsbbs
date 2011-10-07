@@ -104,9 +104,49 @@ $script.ready(
 	    return fns;
 	}();
 
+	api.validation = validation = function(){
+	    var r = {},
+	    validators = {"notEmpty": function(elem){
+			      if (elem.getValue().trim() == "")
+				  {
+				      return false;
+				  }
+			      return true;
+			  }};
+	    r.Form = Class.create
+	    ({
+		 initialize: function(form,options){
+		     this.form = form;
+		     this.options = options;
+		    },
+		 validate: function(){
+		     var form = this.form;
+		     return this.options.all(function(o){
+					  var field =  form[o[0]],
+					   validators = o[1];
+					   
+					   return validators.all(function(o){
+							      if(o.isString())
+							       {
+								   return validators[o](field);
+							       } else if(o.isFunction()) {
+								   return o(field);
+							       } else {
+								   throw "validator must be string or function";
+							       }
+							  });
+					   
+
+				       });
+
+		 }
+	    });
+
+	    return r;
+	}();
 	api.modal = modal = function(){
 	    var r = {},
-	    openModals = [];
+	    modals = [];
 	    r.ModalWindow = Class.create
 	    ({
 		 initialize: function(id){
