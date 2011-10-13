@@ -862,3 +862,7 @@ label {
    background: rgba(250, 229, 227, 1);
 }
 
+.wmd-panel label
+{
+   float: none;
+}
