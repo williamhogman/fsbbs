@@ -83,7 +83,11 @@ $script.ready(
 	    return r;
 	}();
 
+
 	api.remote = remote = function(){
+	    /**
+	     * Exposes methods on the server in a faux-rpc way
+	     */
 	    var calls = 
 		{
 		    "get_thing": {url: "/api/get_thing.json", method: "GET"},
@@ -104,9 +108,59 @@ $script.ready(
 	    return fns;
 	}();
 
-	api.modal = modal = function(){
+	api.validation = validation = function(){
+	    	/**
+		 * Validation api, handles form validation
+		 */
 	    var r = {},
-	    openModals = [];
+	    validators = {"notEmpty": function(elem){
+			      if (elem.getValue().trim() == "")
+				  {
+				      elem.up().addClassName("error");
+				      return false;
+				  }
+			      return true;
+			  }};
+	    /**
+	     * Class for wrapping a form with validation features
+	     */
+	    r.Form = Class.create
+	    ({
+		 initialize: function(form,options){
+		     this.form = form;
+		     this.options = options;
+		    },
+		 validate: function(){
+		     var form = this.form;
+		     return this.options.all(function(o){
+					  var field =  form[o[0]],
+					   validators = o[1];
+					   
+					   return validators.all(function(o){
+							      if(o.isString())
+							       {
+								   return validators[o](field);
+							       } else if(o.isFunction()) {
+								   return o(field);
+							       } else {
+								   throw "validator must be string or function";
+							       }
+							  });
+					   
+
+				       });
+
+		 }
+	    });
+
+	    return r;
+	}();
+	api.modal = modal = function(){
+	    /**
+	     * API for creating modal windows
+	     */
+	    var r = {},
+	    modals = [];
 	    r.ModalWindow = Class.create
 	    ({
 		 initialize: function(id){
@@ -465,6 +519,9 @@ $script.ready(
 	};
 	
 	renderThing = function(thing){
+	    /**
+	     * Handles the rendering of a thing from the datastore
+	     */
 	    var rendered_contents;
 	    rendered_contents = [templates.thing_start.evaluate(parseThing(thing))];
 	    if(thing.type == "category")
