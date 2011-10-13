@@ -523,12 +523,6 @@ h3 {
    float: right;
 }
 
-#msthead
-{
-   border-bottom: 1px solid;
-}
-
-
 
 /* non-layout styling */
 #msthead hgroup a,a[rel=self]
@@ -572,13 +566,20 @@ h3 {
 {
    padding: 0 1em 1em 1em;
    background: #FFF;
+   border-left: #CCC 1px solid;
+   border-right: #CCC  1px solid;
+   margin-top: -1.5em;
 }
 
 #mstfoot
 {
    padding: 0 1em 1em 1em;
+   
    background: #FFF;
-   border-top: 1px solid;
+
+   border-left: 1px #CCC solid;
+   border-right: 1px #CCC solid;
+   border-bottom: 1px #CCC solid;
    -webkit-border-bottom-right-radius: 5px;
    -webkit-border-bottom-left-radius: 5px;
    -moz-border-radius-bottomright: 5px;
@@ -587,16 +588,30 @@ h3 {
    border-bottom-left-radius: 5px;
 }
 
+#mstfoot div
+{
+   border-top: 1px #CCC  solid;
+}
+
 #msthead
 {
    padding: 0 1em 1em 1em;
    background: #FFF;
+   border-left: 1px #CCC solid;
+   border-right: 1px #CCC solid;
+   border-top: 1px #CCC solid;
+  
+   margin-top: 1em;
    -webkit-border-top-left-radius: 5px;
    -webkit-border-top-right-radius: 5px;
    -moz-border-radius-topleft: 5px;
    -moz-border-radius-topright: 5px;
    border-top-left-radius: 5px;
    border-top-right-radius: 5px;
+}
+.loginbar{
+   padding-bottom: 1em;
+   border-bottom: 1px #CCC solid;
 }
 
 p {
