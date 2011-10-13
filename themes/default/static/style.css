@@ -59,8 +59,9 @@ html {
   -ms-text-size-adjust: 100%;
 }
 body {
-  min-height: 100%;
-  font-size: 100%;
+   min-height: 100%;
+   font-size: 100%;
+
 }
 article,
 aside,
@@ -157,9 +158,10 @@ img {
 */
 body {
   /* 16px / 24px */
-  font-family:Helvetica,arial, sans-serif;
-  font-size: 1em;
-  line-height: 1.5em;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   font-size: 1em;
+   line-height: 1.5em;
+   background: #EEE;
 }
 .small {
   /* 13px / 18px */
@@ -568,12 +570,33 @@ h3 {
 
 #container
 {
-   padding-bottom: 1em;
+   padding: 0 1em 1em 1em;
+   background: #FFF;
 }
 
 #mstfoot
 {
+   padding: 0 1em 1em 1em;
+   background: #FFF;
    border-top: 1px solid;
+   -webkit-border-bottom-right-radius: 5px;
+   -webkit-border-bottom-left-radius: 5px;
+   -moz-border-radius-bottomright: 5px;
+   -moz-border-radius-bottomleft: 5px;
+   border-bottom-right-radius: 5px;
+   border-bottom-left-radius: 5px;
+}
+
+#msthead
+{
+   padding: 0 1em 1em 1em;
+   background: #FFF;
+   -webkit-border-top-left-radius: 5px;
+   -webkit-border-top-right-radius: 5px;
+   -moz-border-radius-topleft: 5px;
+   -moz-border-radius-topright: 5px;
+   border-top-left-radius: 5px;
+   border-top-right-radius: 5px;
 }
 
 p {
