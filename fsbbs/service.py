@@ -71,6 +71,9 @@ class BBSService(object):
 
     @defer.inlineCallbacks
     def newTopic(self,tid,title,text,user=None):
+        """
+        Creates a new topic in a thing
+        """
         cont = yield model.anythingFromId(tid,self.ds,ready=True)
 
         if not hasattr(cont,"add"):
