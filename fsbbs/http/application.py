@@ -33,6 +33,9 @@ import auth
 
 
 class Application(cyclone.web.Application):
+    """
+    Our subclass of cyclone.web.Application that hosts the entire site
+    """
     def __init__(self):
         handlers = _handlers
 

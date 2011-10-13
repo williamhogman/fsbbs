@@ -7,6 +7,7 @@ from ..a3 import AuthService,User
 from ..data import datasource
 
 class LoginHandler(BaseHandler,SessionAuthMixin):
+    """provides a login form"""
     @defer.inlineCallbacks
     def get(self):
         logged_in = yield self.verifySession()
@@ -46,6 +47,7 @@ class LoginHandler(BaseHandler,SessionAuthMixin):
 
 
 class RegisterHandler(BaseHandler,SessionAuthMixin):
+    """ provides a register form """
     @defer.inlineCallbacks
     def get(self):
         logged_in = yield self.verifySession()
@@ -79,7 +81,7 @@ class RegisterHandler(BaseHandler,SessionAuthMixin):
 
 
 class LogoutHandler(BaseHandler):
-    
+    """ provides a handler for logging out and redirects the user"""
     def get(self):
         self.clear_cookie("s")
         #todo: invalidate the login cookie
@@ -88,6 +90,9 @@ class LogoutHandler(BaseHandler):
 from ..output import json_out
 
 class RegisterJSONHandler(BaseHandler,SessionAuthMixin):
+    """
+    provides a registration method callable via JSON+XHR
+    """
     @defer.inlineCallbacks
     def post(self):
         logged_in = yield self.verifySession()
@@ -114,6 +119,9 @@ class RegisterJSONHandler(BaseHandler,SessionAuthMixin):
         
 
 class LoginJSONHandler(BaseHandler,SessionAuthMixin):
+    """
+    provides a login method callable via JSON+XHR
+    """
     @defer.inlineCallbacks
     def post(self):
         logged_in = yield self.verifySession()
@@ -138,6 +146,9 @@ class LoginJSONHandler(BaseHandler,SessionAuthMixin):
             
 
 class LogoutJSONHandler(BaseHandler):
+    """
+    provides a logout method callable via JSON+XHR
+    """
     def post(self):
         self.clear_cookie("s")
         self.set_header("Content-Type","application/json")

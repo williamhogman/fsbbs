@@ -6,6 +6,7 @@ from ..output import json_out,msgpack_out,html
 
 
 class IndexHandler(BaseHandler,SessionAuthMixin):
+    """ handler getting the index page of the hosted BBS"""
     @defer.inlineCallbacks
     def get(self):
         ses_ver = self.verifySession()
