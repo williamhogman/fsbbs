@@ -1,5 +1,14 @@
 $script("http://cdnjs.cloudflare.com/ajax/libs/prototype/1.7.0.0/prototype.js","ptype");
 $script("/s/templates.js","templates");
+window.$vendor = function(lib,ns){
+    /**
+     * requires a thirdparty script 
+     * and returns an object with a ready method
+     * for calling code when the library is ready
+     */
+    $script("/j/vendor/"+ns+"/"+lib+".js",lib);
+    return  {"ready": $script.ready.curry($script,lib)};
+}
 $script(["Markdown.Converter.js","Markdown.Sanitizer.js","Markdown.Editor.js"].map(function(v){
     return "/j/vendor/pagedown/"+v;
 }),"markdown");
