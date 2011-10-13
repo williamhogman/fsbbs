@@ -1,0 +1,28 @@
+To install fsbbs you first need to install its dependencies
+
+$ pip install cyclone jinja2 markdown msgpack twisted zope.interface txtwistedapi
+
+you then need to install redis which you can  find in your package manager
+
+for now we need to setup the basic database structure manually
+$ redis-cli
+
+> set thing:1:type forum
+> set thing:1:name "My Forum"
+> set thing:1:tagline "My tagline"
+
+Lets make a category too
+> set thing:2:type category
+> set thing:2:title "General"
+the description may use markdown
+> set thing:2:description "Discuss something here"
+
+Exit out of the redis console.
+
+Now it is time to launch fsbbs
+
+cd to the root directory of the source tree and run:
+$ python2 -m fsbbs
+
+the default port is 3037 so go ahead and browse there
+
