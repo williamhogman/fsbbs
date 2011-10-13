@@ -4,6 +4,7 @@ from ...service import service
 import markdown
 
 def markdownFilter(text):
+    """ jinja filter for rendering markdown, not async and very slow"""
     return markdown.markdown(text,safe_mode=True)
 
 def dateFilter(dt):
@@ -20,6 +21,7 @@ class HTMLOutputFormatter:
     """ processes dict objects and uses a template to format them as HTML """
 
     def __init__(self):
+        """Creates a new instance of HTMLOutputFormatter"""
         # actually we don't support themes yet :o
         self.env = Environment(loader=FileSystemLoader('themes/default/'))
         self.env.filters['markdown'] = markdownFilter
