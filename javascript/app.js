@@ -7,9 +7,7 @@ window.$vendor = function(ns,lib){
     $script("/j/vendor/"+ns+"/"+lib+".js",lib);
 };
 $vendor("pagedown","markdown");
-/*$script(["Markdown.Converter.js","Markdown.Sanitizer.js","Markdown.Editor.js"].map(function(v){
-    return "/j/vendor/pagedown/"+v;
-}),"markdown");*/
+
 $script.ready(
     ["templates","ptype"],
     function(){
@@ -42,7 +40,12 @@ $script.ready(
 	    push = (window.history.pushState ? window.history.pushState.bind(window.history) : e),
 	    replace = (window.history.replaceState ? window.history.replaceState.bind(window.history) : e),
 
-	    HistoryState = Class.create({
+	    HistoryState = Class.create(
+		/**
+		 * Representation of a page in the history
+		 */
+		{
+		
 		initialize: function(o){
 		    this.wrapped = o;
 		    // get for how long this resource has been stored
@@ -57,6 +60,9 @@ $script.ready(
 		}
 	    }),
 	    ThingHistoryState = Class.create(HistoryState,
+					     /**
+					      * Represents a the state of the page when a thing is displayed
+					      */
 	    {
 		initialize: function($super,o){
 		    $super(o);
@@ -67,6 +73,10 @@ $script.ready(
 		}
 	    }),
 	    FirstHistoryState = Class.create(HistoryState,
+					     /**
+					      * Represents the initial state the page
+					      * has when a user lands on the page
+					      */
             {
 		initialize: function($super,o)
 		{
@@ -76,12 +86,16 @@ $script.ready(
 	    });
 
 	    r.pushThing = function(thing){
+		/*
+		 * Pushes a thing onto the history state.
+		 */
 		var url = "/t/"+thing.id+".html",
 		state = new ThingHistoryState(thing),
 		title  = thing.title || thing.name || thing.type || "thing";
 		push(state,title,url);
 	    };
 
+	    // create the default state
 	    (function(){
 		 var art = $$("#things article");
 		 if(art.length > 0)
@@ -200,15 +214,24 @@ $script.ready(
 	    return r;
 	}();
 	api.auth = auth = function(){
+	    /**
+	     * Namespace managing authentication and authentication UI
+	     */
 	    var loggedin = false,
 	    uid = null,
 	    username = null,
 	    r = {};
 
 	    r.ui = function(){
+		/**
+		 * Manages the authentication ( the userbar and authentication modals)
+		 */
 		var e={},
 		loginbar = $$(".loginbar")[0];
 		e.update = function(){
+		    /*
+		     * Updates the loginbar when an authentication state change (e.g. login) has been made
+		     */
 		    var msg;
 		    if(loggedin) {
 			msg = templates.status_user.evaluate({username: username});
@@ -388,6 +411,9 @@ $script.ready(
             }();
 	    
 	    r.doLogout = function(cb){
+		/**
+		 * Logs the user out and updates the ui
+		 */
 		remote.logout({onSuccess: function(){
 				   loggedin = false;
 				   uid = null;
@@ -397,6 +423,9 @@ $script.ready(
 	    };
 	    
 	    r.setUser = function(userid,uname){
+		/**
+		 * sets the currently logged in user
+		 */
 		if(userid > 0)
 		{
 		    username = uname;
@@ -460,6 +489,10 @@ $script.ready(
 	})();
 
 	parseThing = function(thing){
+	    /**
+	     * creates properties extra properities on a downloaded thing
+	     * and performs conversions to markdown
+	     */
 	    if (thing.original_post && thing.original_post.pubdate)
 	    {
 		thing.original_post.pubdate = new Date(Date.parse(thing.original_post.pubdate));
@@ -495,6 +528,10 @@ $script.ready(
 	};
 
 	updateInteractions = function(thing){
+	    /**
+	     * Updates the interactions (posting ui) ui according the current
+	     * login state and page (being a category or a topic)
+	     */
 	    if(!auth.isLoggedIn())
 	    {
 		$('interactions').update("<p>You need to login in order to post</p>");
@@ -521,6 +558,9 @@ $script.ready(
 	};
 	
 	loadThing = function(tid){
+	    /**
+	     * Downloads a thing from the server and renders it
+	     */
 	    var success = function(response){
 		
 		renderThing(response.responseJSON.thing);
@@ -600,7 +640,6 @@ $script.ready(
 	    
 	    md.addEditor("-newtopic");
 	    md.addEditor("-newpost");
-	    console.log("new topics added");
 	});
 	
 	document.observe("dom:loaded",function(){
