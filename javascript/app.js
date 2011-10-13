@@ -76,7 +76,11 @@ $script.ready(
 	    };
 
 	    (function(){
-		firstId = $$("#things article")[0].readAttribute("data-id");
+		 var art = $$("#things article");
+		 if(art.length > 0)
+		     var firstId = art[0].readAttribute("data-id");
+		 else
+		     var firstId = 1; // default to mainpage
 		replace(new FirstHistoryState(firstId),"","#");
 	    })();
 
