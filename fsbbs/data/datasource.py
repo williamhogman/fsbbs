@@ -2,6 +2,7 @@ import txredisapi
 from twisted.internet import defer
 
 class DataSourceFactory:
+    """Factory class for creating datasources"""
     def __init__(self):
         self.load()
 
@@ -12,10 +13,12 @@ class DataSourceFactory:
         return DataSource((self.api))
 
 class DataSource:
+    """
+    Thin wrapper around the redis api If you wanna do mockups or
+    provide a different database backend just make your own datasource
+    """
     def __init__(self,api):
         self.api = api
-
-
 
     def get(self,key):
         return self.api.get(key)
@@ -35,8 +38,12 @@ class DataSource:
     def mget(self,*args):
         return self.api.mget(*args)
 
+# dsf is our singleton datasource factory
+# TODO: provid confiurablity
 dsf = DataSourceFactory()
+
 def getDatasource():
+    """ returns a datasource for anywhere"""
     return dsf.getConnection()
     
 

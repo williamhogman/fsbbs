@@ -1,4 +1,7 @@
-#!/bin/env python2
+"""
+provides a diagnostics daemon for the data module
+"""
+
 from .model import Thing,ThingNotFoundError
 import datasource
 from twisted.internet import defer

@@ -87,6 +87,10 @@ class Thing(object):
 
 
     def __init__(self,tid,ds=None,pretype=None):
+        """
+        creates a new instance of a thing
+        don't actually call this outside the datalayer unless you know what you are doing
+        """
         self.datasource = ds
         if pretype is not None:
             self.type = pretype
@@ -126,12 +130,11 @@ class Container(Thing):
         yield self.datasource.zadd(self._key("contents"),score,tid)
 
     def get_contents(self):
+        """gets the contents of the container"""
         return manyFromIds(self.contents,self.datasource,ready=True)
         defs = list()
         for tid in self.contents:
             ## yo dawg so i herd u liek async!
-            # get a thing 
-            
             d = anythingFromId(tid,self.datasource,ready=True)
 
             def onError(err):
@@ -167,6 +170,7 @@ class Container(Thing):
 
     @defer.inlineCallbacks
     def asDict(self,bs=None,contentsParsed=False,**kwargs):
+        """gets the container as a dict suitable for serialization"""
         if contentsParsed:
             
             cnt = yield self._contentsAsDict()
@@ -198,6 +202,7 @@ class Topic(Container):
         
     @defer.inlineCallbacks
     def asDict(self,bs=None,**kwargs):
+        """gets the topic as a dict"""
         d = {"title": self.title}
         try:
             op = yield anythingFromId(self.original_post,self.datasource,ready=True)
@@ -220,7 +225,7 @@ class Topic(Container):
 
     @staticmethod
     def new(title,original_post,ds=None):
-        """ creates a new instance of topic """
+        """ creates a new topic (as opposed to just an representation of a preexisting one """
         t = Topic(-1,ds)
         t.original_post = original_post.tid
         t.title = title
@@ -252,6 +257,7 @@ class Post(Thing):
     
     @property
     def pubdate(self):
+        """Gets the pubdate as a pythondate"""
         if self.pubdate_stamp is None:
             return None
         return datetime.datetime.utcfromtimestamp(self.pubdate_stamp)
@@ -261,6 +267,7 @@ class Post(Thing):
 
     @defer.inlineCallbacks
     def save(self):
+        """saves a post to datastore"""
         if not self.update:
             yield self.newThing("post")
             self.update = True
@@ -345,6 +352,7 @@ class Forum(Container):
 
 
 
+# dict containing our type name to class mapping
 type_to_class = {}
 
 # creating a mapping list between types in the db and our classes
@@ -354,7 +362,10 @@ for cls in [Container,Topic,Post,Forum,Category]:
 user_cache = dict()
 @defer.inlineCallbacks
 def usernameById(userid,ds):
-    """ caching function getting a username by user id """
+    """ 
+    caching function getting a username by user id
+    TODO: move this deeper into the datalayer
+    """
     if userid in user_cache:
         defer.returnValue(user_cache[userid])
     else:
