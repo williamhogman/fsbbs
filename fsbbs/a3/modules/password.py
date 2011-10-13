@@ -10,6 +10,7 @@ from twisted.python import log
 import hashlib
 
 class DummyPasswords():
+    """ implements dummy passwords providing a simple backdoor for debugging"""
     implements(IAuthModule)
 
     module_type = "authentication"
@@ -27,7 +28,7 @@ class DummyPasswords():
 addAuthModule(DummyPasswords)
 
 class BasicPasswordMixin:
-
+    """Mixin providing shared functionality to modules needing to interact with the standard redis stored passwords"""
     def getSalt(self):
         if self._salt is not None:
             return defer.succeed(self._salt)
@@ -44,6 +45,7 @@ class BasicPasswordMixin:
 
 
 class BasicPasswords(BasicPasswordMixin):
+    """ Implements a logins with sha256 and salted passwords"""
     implements(IAuthModule)
 
     module_type = "authentication"
@@ -81,6 +83,7 @@ addAuthModule(BasicPasswords)
 
         
 class ChangeBasicPassword(BasicPasswordMixin):
+    """ implements changing of a basic password"""
     implements(IAuthModule)
     module_type="password"
     

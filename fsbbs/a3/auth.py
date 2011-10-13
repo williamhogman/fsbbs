@@ -28,6 +28,7 @@ chains = {"default": ["BannedModule","SessionSecretModule",
     
 
 class AuthService:
+    """ provides a service interface for the authentication system"""
     def __init__(self):
         pass
     
@@ -75,12 +76,15 @@ class AuthChain:
         
 
         def logFromModule(module,msg):
+            """logs a message from a module """
             log.msg("{} {}".format(module.__class__.__name__,msg))
 
         def moduleLog(module):
+            """ logs information about the state of a module after it has run"""
             logFromModule(module,"success:{} failed:{}".format(self._success,self.failed))
 
         def callModule(arg,module):
+            """calls a module this includes processing preconditions"""
             shouldRun = module.precondition(self) if hasattr(module,"precondition") else True
 
             if shouldRun:

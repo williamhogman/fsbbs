@@ -10,6 +10,7 @@ from twisted.internet import defer
 
 
 class BasicUsername:
+    """module for finding a username in the redis backend"""
     implements(IAuthModule)
 
 
@@ -41,6 +42,7 @@ addAuthModule(BasicUsername)
 
 
 class RegisterUser:
+    """register a user to the redis backend"""
     implements(IAuthModule)
     
     module_type = "register"

@@ -8,6 +8,7 @@ from twisted.python import randbytes
 
 
 class SessionSecretModule:
+    """Verifies session secrets stored in a redis backend"""
     implements(IAuthModule)
 
     def __init__(self,ds=None):
@@ -39,6 +40,7 @@ class SessionSecretModule:
 addAuthModule(SessionSecretModule)
 
 class SessionStorageModule:
+    """ Stores sesison secrets upon successful login, also providings rudimentary session-hijacking protections"""
     implements(IAuthModule)
 
     module_type = "session"
