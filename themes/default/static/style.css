@@ -771,6 +771,16 @@ nav.listing ul
     left: 300px;
 }
 
+a[href*=\/u\/]
+{
+    color: #000;
+    text-decoration: none;
+}
+
+a[href*=\/u\/]:hover
+{
+    color: #000;
+}
 
 
 
