@@ -17,6 +17,14 @@ Lets make a category too
 the description may use markdown
 > set thing:2:description "Discuss something here"
 
+increment the thing counter by two
+> incrby thing:thing_tid 2
+
+make a salt for the default auth system
+set authmod:BasicPasswords:salt "foobar"
+
+We also need to set a 
+
 Exit out of the redis console.
 
 Now it is time to launch fsbbs
