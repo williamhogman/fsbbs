@@ -33,10 +33,14 @@ import auth
 
 
 class Application(cyclone.web.Application):
+    """
+    Our subclass of cyclone.web.Application that hosts the entire site
+    """
     def __init__(self):
         handlers = _handlers
 
         settings = dict(
         )
         handlers.append((r"/s/(.*)",cyclone.web.StaticFileHandler,{"path": "themes/default/static/"}))
+        handlers.append((r"/j/(.*)",cyclone.web.StaticFileHandler,{"path": "javascript/" }))
         cyclone.web.Application.__init__(self, handlers, **settings)

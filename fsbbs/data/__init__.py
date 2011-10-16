@@ -1,1 +1,1 @@
-""" provides a data module for fsbbs """
+""" provides the data layer for fsbbs """

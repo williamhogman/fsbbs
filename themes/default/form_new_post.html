@@ -1,9 +1,12 @@
 <form action="/new_post" method="post">
   <legend>Reply to this topic</legend>
   <input type="hidden" value="{{ thing.id }}" name="tid" />
-  <div class="input">
+  <div class="input wmd-panel">
     <label for="text">Text</label>
-    <textarea name="text"></textarea>
+    <div id="wmd-button-bar-newpost"></div>
+    <textarea class="wmd-input" name="text" id="wmd-input-newpost"></textarea>
+  </div>
+  <div id="wmd-preview-newpost" class="wmd-preview">
   </div>
   <div class="actions">
     <input type="submit" value="Post" />

@@ -1,8 +1,0 @@
-a3 står för Authentication Authorization and Accoubting (vnaligen
-förkortat AAA) men för att undvika förvirring med termen som används
-för tex RAIDUS så används a3 inom denna applikation. Modulens syfte är
-dock det samma. Den sköter verfikiation av information så som
-löseord, session cookies och oauth tokens.  Det sköte även access
-control (authorization) det vill säga vilka användare som kan utföra
-vilka funktioner. Slutligen så sköter den också loggning av oväntade
-händelser under denna process (accounting)

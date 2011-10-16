@@ -6,6 +6,7 @@ from ..output import json_out,msgpack_out,html
 from ..data.model import ThingNotFoundError
 
 class ThingHandler(BaseHandler,SessionAuthMixin):
+    """handler for thing pages"""
     @defer.inlineCallbacks
     def get(self,tid):
         ses_ver = self.verifySession()
@@ -23,6 +24,7 @@ class ThingHandler(BaseHandler,SessionAuthMixin):
         
 
 class ThingJSONHandler(JSONDataHandler):
+    """ provides a method callable via JSON+XHR that returns the passed in thing"""
     @defer.inlineCallbacks
     def getData(self):
         tid = self.get_argument("id")
@@ -35,6 +37,7 @@ class ThingJSONHandler(JSONDataHandler):
 
 
 class PostToContainer(BaseHandler,SessionAuthMixin):
+    """ handler for posting to any container"""
     @defer.inlineCallbacks
     def post(self):
         yield self.verifySession()
@@ -47,6 +50,7 @@ class PostToContainer(BaseHandler,SessionAuthMixin):
         self.redirect("/t/{}.html".format(tid))
         
 class NewTopic(BaseHandler,SessionAuthMixin):
+    """ handler for posting new topics"""
     @defer.inlineCallbacks
     def post(self):
         yield self.verifySession()

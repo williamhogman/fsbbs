@@ -38,8 +38,9 @@ class BaseDataHandler(BaseHandler):
 
 
 class JSONDataHandler(BaseDataHandler):
-    mimetype = "application/json"
     """ BaseClass for json requests """
+    mimetype = "application/json"
+
     def formatOutput(self,data):
         self.write(json_out.serialize(data))
         
@@ -55,7 +56,7 @@ class MsgpackDataHandler(BaseDataHandler):
 
 
 class SimpleMsgpackHandler(MsgpackDataHandler):
-
+    """Handler for simple msgpack request"""
     @defer.inlineCallbacks
     def getData(self):
         data = yield self.data_function()
@@ -79,11 +80,13 @@ class SimpleJSONHandler(JSONDataHandler):
 
 
 def SimpleJSON(data_function):
+    """function for hooking up a function with JSON outputter"""
     def inner(app,request):
         return SimpleJSONHandler(data_function,app,request)
     return inner
 
 def SimpleMsgpack(data_function):
+    """ function for hooking  up a function with a msgpack outputter"""
     def inner(app,request):
         return SimpleMsgpackHandler(data_function,app,request)
     return inner
@@ -93,10 +96,10 @@ from ..a3 import AuthService
 from ..a3.user import User
 from ..data import datasource
 class SessionAuthMixin(object):
-
     """ mixin adding funcionality for easily verifying sessions """
 
     def requireLogin(self):
+        """ requires that the user is logged in callable after verifySession has been called"""
         if not self.logged_in:
             self.set_status(401)
             self.finish("Unauthorized")
@@ -104,6 +107,7 @@ class SessionAuthMixin(object):
         return True
     
     def getUserDict(self):
+        """ gets data about the current user"""
         if self.logged_in:
             return {"user": self.user, "logged_in":self.logged_in} 
         else:
@@ -111,6 +115,7 @@ class SessionAuthMixin(object):
 
     @defer.inlineCallbacks
     def verifySession(self):
+        """returns a defered that is called when the session has been verified"""
         authserv = AuthService()
         session_cookie = self.get_cookie("s")
         if session_cookie is None:

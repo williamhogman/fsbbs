@@ -59,8 +59,9 @@ html {
   -ms-text-size-adjust: 100%;
 }
 body {
-  min-height: 100%;
-  font-size: 100%;
+   min-height: 100%;
+   font-size: 100%;
+
 }
 article,
 aside,
@@ -157,9 +158,10 @@ img {
 */
 body {
   /* 16px / 24px */
-  font-family:Helvetica,arial, sans-serif;
-  font-size: 1em;
-  line-height: 1.5em;
+   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+   font-size: 1em;
+   line-height: 1.5em;
+   background: #EEE;
 }
 .small {
   /* 13px / 18px */
@@ -245,6 +247,12 @@ textarea,.largeinput
 {
     border-bottom: 1px dotted;
 }
+
+.modalWindow
+{
+   width: 50%;
+   left: 25%;
+}
    
 
 h1, h2 {
@@ -300,6 +308,16 @@ h3 {
     margin: 1.1428571428571428em 0 0.5714285714285714em;
   }
 }
+
+/* not mobile  */
+@media screen and (max-width: 720px)
+{
+    .wmd-button-row 
+    {
+	display: none;
+    }
+}
+
 /*
 *
 *  Eight-column grid active
@@ -326,6 +344,17 @@ h3 {
       margin-left: 50%;
    }
 
+   /* we can't fit the wmd panel side by side on this screen size */
+   .wmd-preview, .wmd-panel
+   {
+      width: 50%;
+   }
+
+   .wmd-input
+   {
+      width: 100%;
+   }
+
 
 
    .medinput
@@ -338,14 +367,16 @@ h3 {
       width: 50%;
    }
 
-   .actions
-   {
-      margin-left: 50%;
-   }
 
    .thing-category article h3
    {
        width: 50%;
+   }
+
+   .modalWindow
+   {
+      width: 50%;
+      left: 25%;
    }
 }
 /* @media screen and (min-width: 888px) */
@@ -420,6 +451,29 @@ h3 {
   #twoway .wrapper:first-child {
     margin-left: 25%;
   }
+   
+
+   .wmd-preview, .wmd-panel
+   {
+      float: left;
+      width: 25%;
+   }
+
+   .wmd-preview
+   {
+      margin: 4em 0 0 6.25%;
+   }
+
+   .wmd-input
+   {
+      width: 100%;
+   }
+
+   .actions
+   {
+      clear: both;
+      margin-left: 25%;
+   }
 
    
    .medinput
@@ -442,7 +496,12 @@ h3 {
    {
        width: 25%;
    }
-   
+
+   .modalWindow
+   {
+      width: 25%;
+      left: 37.5%;
+   }
 }
 /* @media screen and (min-width: 2080px) */
 @media screen and (min-width: 130em) {
@@ -459,11 +518,10 @@ h3 {
    margin: 0 0 1em;
 }
 
-#msthead
+.loginbar .button
 {
-   border-bottom: 1px solid;
+   float: right;
 }
-
 
 
 /* non-layout styling */
@@ -506,12 +564,55 @@ h3 {
 
 #container
 {
-   padding-bottom: 1em;
+   padding: 0 1em 1em 1em;
+   background: #FFF;
+   border-left: #CCC 1px solid;
+   border-right: #CCC  1px solid;
+   min-height: 5em;
+   margin-top: -1.5em;
 }
 
 #mstfoot
 {
-   border-top: 1px solid;
+   padding: 0 1em 1em 1em;
+   
+   background: #FFF;
+
+   border-left: 1px #CCC solid;
+   border-right: 1px #CCC solid;
+   border-bottom: 1px #CCC solid;
+   -webkit-border-bottom-right-radius: 5px;
+   -webkit-border-bottom-left-radius: 5px;
+   -moz-border-radius-bottomright: 5px;
+   -moz-border-radius-bottomleft: 5px;
+   border-bottom-right-radius: 5px;
+   border-bottom-left-radius: 5px;
+}
+
+#mstfoot div
+{
+   border-top: 1px #CCC  solid;
+}
+
+#msthead
+{
+   padding: 0 1em 1em 1em;
+   background: #FFF;
+   border-left: 1px #CCC solid;
+   border-right: 1px #CCC solid;
+   border-top: 1px #CCC solid;
+  
+   margin-top: 1em;
+   -webkit-border-top-left-radius: 5px;
+   -webkit-border-top-right-radius: 5px;
+   -moz-border-radius-topleft: 5px;
+   -moz-border-radius-topright: 5px;
+   border-top-left-radius: 5px;
+   border-top-right-radius: 5px;
+}
+.loginbar{
+   padding-bottom: 1em;
+   border-bottom: 1px #CCC solid;
 }
 
 p {
@@ -550,7 +651,7 @@ legend
    padding: 1em 0;
 }
 
-.actions input[type=submit] {
+.actions input[type=submit],.button {
   color: #ffffff;
   background-color: #0064cd;
   background-repeat: repeat-x;
@@ -576,10 +677,10 @@ legend
   -ms-transition: 0.1s linear all;
   -o-transition: 0.1s linear all;
   transition: 0.1s linear all;
-
+  text-decoration: none;
 }
 
-.actions input[type=submit]:hover
+.actions input[type=submit]:hover, .button:hover
 {
    background-position: 0 -15px;
    text-decoration: none;
@@ -598,4 +699,180 @@ nav.listing ul
 .clearfix
 {
     clear: both;
+}
+
+
+/** markdown editor */
+.wmd-button-bar 
+{
+	width: 100%;
+	background-color: Silver; 
+}
+
+
+.wmd-preview 
+{ 
+	background-color: #c0e0ff; 
+}
+
+.wmd-button-row 
+{
+	position: relative; 
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	margin-top: 10px;
+	padding: 0px;  
+	height: 20px;
+}
+
+.wmd-spacer
+{
+	width: 1px; 
+	height: 20px; 
+	margin-left: 14px;
+	
+	position: absolute;
+	background-color: Silver;
+	display: inline-block; 
+	list-style: none;
+}
+
+.wmd-button {
+    width: 20px;
+    height: 20px;
+    padding-left: 2px;
+    padding-right: 3px;
+    position: absolute;
+    display: inline-block;
+    list-style: none;
+    cursor: pointer;
+}
+
+.wmd-button > span {
+    background-image: url(../j/vendor/pagedown/wmd-buttons.png);
+    background-repeat: no-repeat;
+    background-position: 0px 0px;
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+}
+
+.wmd-spacer1
+{
+    left: 50px;
+}
+.wmd-spacer2
+{
+    left: 175px;
+}
+.wmd-spacer3
+{
+    left: 300px;
+}
+
+a[href*=\/u\/]
+{
+    color: #000;
+    text-decoration: none;
+}
+
+a[href*=\/u\/]:hover
+{
+    color: #000;
+}
+
+
+
+.wmd-prompt-background
+{
+	background-color: Black;
+}
+
+.wmd-prompt-dialog
+{
+	border: 1px solid #999999;
+	background-color: #F5F5F5;
+}
+
+.wmd-prompt-dialog > div {
+	font-size: 0.8em;
+	font-family: arial, helvetica, sans-serif;
+}
+
+
+.wmd-prompt-dialog > form > input[type="text"] {
+	border: 1px solid #999999;
+	color: black;
+}
+
+.wmd-prompt-dialog > form > input[type="button"]{
+	border: 1px solid #888888;
+	font-family: trebuchet MS, helvetica, sans-serif;
+	font-size: 0.8em;
+	font-weight: bold;
+}
+
+
+
+/** 
+ *Modals 
+ */
+
+.modalWindow {
+   display: block;
+   margin: 0 auto;
+
+   position: fixed;
+
+   top: -310px;
+
+   
+   padding: 20px 20px 20px 20px;
+   border: solid 1px #999;
+   background: #FFF;
+   background: -webkit-gradient(linear, left top, left bottom, from(rgb(255,255,255)), to(rgb(230,230,230)));
+
+   -webkit-box-shadow: 0px 3px 6px rgba(0,0,0,0.25);
+   -webkit-border-bottom-left-radius: 6px;
+   -webkit-border-bottom-right-radius: 6px;
+   -webkit-transition: -webkit-transform 0.50s ease-out;
+   -webkit-transform: translateY(-570px);
+   -moz-transform: translatey(-570px);
+}
+
+.modalWindow.show {
+
+   -webkit-transform: translateY(400px);
+   -moz-transform: translatey(400px);
+}
+
+
+#modal-login h3
+{
+   margin: 0 1em 0 0;
+}
+
+#modal-login p
+{
+   margin: 0 0 2em 0;
+}
+
+label {
+   min-width: 6em;
+   float: left;
+}
+
+.error
+{
+   padding: 0.5em 0; 
+   margin: -0.5em 0 0.5em;
+   border-radius: 5px;
+   background: #FAE5E3;
+   background: rgba(250, 229, 227, 1);
+}
+
+.wmd-panel label
+{
+   float: none;
 }

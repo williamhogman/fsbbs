@@ -1,0 +1,21 @@
+body {
+    font-family: "Times New Roman", serif;
+
+}
+
+p {
+    text-align: justify;
+}
+
+
+.dia{
+    width: 50%;
+}
+
+.dia-l{
+    width: 75%;
+}
+
+.dia-max{
+    width: 100%;
+}

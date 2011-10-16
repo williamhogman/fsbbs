@@ -12,6 +12,13 @@
   <body>
     {% block body %}
     {% endblock %}
+    <script>
+      {% if user %}
+      window.initial_uid = {{user.uid}};
+      {% endif %}
+      $script("/j/app.js","app");
+
+    </script>
     {# chrome frame installer #}
     <!--[if lt IE 7 ]>
 	<script>
