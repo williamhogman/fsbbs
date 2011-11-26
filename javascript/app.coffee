@@ -387,12 +387,12 @@ $script.ready ["templates","ptype"], ->
                                         templates.category_topic.evaluate(parseThing(sub))
                                 ))
                         else if thing.type == "topic"
-                                rendered.push(templates.topic_op.evaluate(parseThing(thing.original_post)))
-                                rendered.concat(thing.contents.map( (sub) ->
-                                        templates.topic_post.evaluate(parseThing(sub))
-                                ))
-                        rendered.push(templates.thing_end.evaluate(thing))
-                        $("things").update(rendered_contents.join(""))
+                                rendered.push templates.topic_op.evaluate(parseThing(thing.original_post))
+                                rendered.concat thing.contents.map (sub)->
+                                        templates.topic.evaluate(parseThing(sub))
+
+                        rendered.push templates.thing_end.evaluate thing
+                        $("things").update rendered_contents.join ""
                         history.pushThing(thing)
                         addLinkEvents()
                         updateInterations()
