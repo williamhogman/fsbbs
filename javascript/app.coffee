@@ -294,15 +294,16 @@ $script.ready ["templates","ptype"], ->
                 humanise = {}
 
                 humanise.date = (->
-                        measures = (
-                                second: 1
-                                minute: 60
-                                hour: 3600
-                		day: 86400
-                		week: 604800
-                		month: 2592000
-                		year: 31536000
-                                )
+                        measures = {
+                                second: 1,
+                                minute: 60,
+                                hour: 3600,
+                                day: 86400,
+                                week: 604800,
+                                month: 2592000,
+                                year: 31536000
+                                }
+
 
                         chkMultiple = (amount,type) ->
                                 if amount > 1
@@ -323,7 +324,8 @@ $script.ready ["templates","ptype"], ->
 
                                 amount = Math.round diff/measures[denom]
                                 return chkMultuple(amount,denom) + " ago"
-                                )()
+
+                )()
 
                 parseThing = (thing) ->
                         # crates extra properties on a downloaded thing
