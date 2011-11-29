@@ -15,7 +15,6 @@ class EmailDelivery(object):
         # All addresses are accepted
         return origin
     def validateTo(self,user):
-        print(user)
         if user.dest.local == "test":
             return lambda: CommandMessage()
         raise  SMTPBadRcpt(user)
