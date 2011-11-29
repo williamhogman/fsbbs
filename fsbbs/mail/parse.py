@@ -15,10 +15,30 @@ class MessageParser(object):
         name,val = self._parse_header(header)
         self.headers[name] = val
 
+
+    def _parse_from(self,hdr):
+        hdr = hdr.strip()
+        print(hdr)
+        start = hdr.find("<")
+        if start != -1:
+            rel = hdr[start+1:]
+            stop = rel.find(">")
+            if stop != -1:
+                return rel[:stop].strip()
+            else:
+                return hdr
+        else:
+            return hdr
+            
+            
     def _parse_header(self,header):
         separator = header.find(":")
         name = header[:separator]
         value = header[separator+1:].lstrip()
+        # headers are not case-sensitive, but servers usually correct it
+        if name.lower() == "from": 
+            return (name,self._parse_from(value))
+            
         return (name,value)
 
     def feed(self,line):
