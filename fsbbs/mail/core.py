@@ -1,8 +1,9 @@
 from zope.interface import implements
 from twisted.internet import defer
-from parse import ParsedMessage
 from twisted.mail.smtp import SMTPFactory, ESMTP,IMessageDelivery,IMessage,SMTPBadRcpt
 
+from parse import ParsedMessage
+import post
 
 class EmailDelivery(object):
     """Class for routing emails the correct message class"""
@@ -15,7 +16,7 @@ class EmailDelivery(object):
         # All addresses are accepted
         return origin
     def validateTo(self,user):
-        import post
+
         if user.dest.local == "test":
             return lambda: CommandMessage()
         elif user.dest.local.startswith("reply-"):
