@@ -20,10 +20,13 @@ class EmailDelivery(object):
 
 
 class MessageParser(object):
+    """ Class for parsing messages as they come in over the wire"""
+
     def __init__(self):
         self.reset()
 
     def reset(self):
+        """ Resets the parser to its initial state"""
         self.lines = list()
         self.headers =  dict()
         self._in_body = False
@@ -39,6 +42,7 @@ class MessageParser(object):
         return (name,value)
 
     def feed(self,line):
+        """ feeds a line into the message parser"""
         # empty line not in body
         if not self._in_body and not line:
             self._in_body = True
@@ -47,22 +51,33 @@ class MessageParser(object):
         else:
             self._add_header(line)
 
-    def get(self): return (self.headers,self.lines)
+    def get(self): 
+        """ Gets the headers and body of the message being parsed """
+        return (self.headers,self.lines)
+
     def get_and_reset(self):
+        """ gets the data and resets the parser to its initial state"""
         rtn = self.get()
         self.reset()
         return rtn
 
 class ParsedMessage(object):
+    """ A message that is parsed using a message parser. message_parsed is called """
     def __init__(self):
         self.parser = MessageParser()
 
-    def lineReceived(self,line): self.parser.feed(line)
+    def lineReceived(self,line):
+        self.parser.feed(line)
         
     def eomReceived(self):
         return self.message_parsed(self.parser.get_and_reset())
 
-    def connectionLost(self): self.parser.reset()
+    def connectionLost(self):
+        self.parser.reset()
+
+    def message_parsed(self,msg):
+        """ Override this in your subclass to get the message when it has been parsed"""
+        pass
 
 class CommandMessage(ParsedMessage):
     implements(IMessage)
@@ -78,6 +93,7 @@ class CommandMessage(ParsedMessage):
     
 
 class EmailInterfaceFactory(SMTPFactory):
+    """ Factory class for the fsbbs smtp server"""
     protocol = ESMTP
     def __init__(self,*a,**kw):
         SMTPFactory.__init__(self,*a,**kw)
