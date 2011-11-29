@@ -1,25 +1,19 @@
+
 def _load():
     import yaml
     with open("config.yaml") as f:
         return yaml.load(f)
 
+_data = _load()
 
-def _run():
-    import sys
-
-    cfg = _load()
-    module = sys.modules[__name__] 
-    def inner(data,into):
-        for key,val in data.items():
-            if isinstance(val,dict):
-                setattr(into,key,inner(val,type('new',(object,))))
-            else:
-                setattr(into,key,val)
-    inner(cfg,module)
+def get(key):
+    parts = key.split(".")
     
+    cur = _data[parts[0]]
+    for part in parts[1:]:
+        cur = cur[part]
 
-_run()
-                            
+    return cur
 
         
 
