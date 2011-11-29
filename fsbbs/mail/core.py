@@ -15,8 +15,13 @@ class EmailDelivery(object):
         # All addresses are accepted
         return origin
     def validateTo(self,user):
+        import post
         if user.dest.local == "test":
             return lambda: CommandMessage()
+        elif user.dest.local.startswith("reply-"):
+            return lambda: post.Reply()
+        elif user.dest.local.startswith("post-"):
+            return lambda: post.Post()
         raise  SMTPBadRcpt(user)
 
 
