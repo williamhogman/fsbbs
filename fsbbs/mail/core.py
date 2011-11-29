@@ -20,9 +20,9 @@ class EmailDelivery(object):
         if user.dest.local == "test":
             return lambda: CommandMessage()
         elif user.dest.local.startswith("reply-"):
-            return lambda: post.Reply()
+            return lambda: post.Reply(user.dest.local)
         elif user.dest.local.startswith("post-"):
-            return lambda: post.Post()
+            return lambda: post.Post(user.dest.local)
         raise  SMTPBadRcpt(user)
 
 
