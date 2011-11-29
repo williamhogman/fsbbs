@@ -77,7 +77,7 @@ class BBSService(object):
         cont = yield model.anythingFromId(tid,self.ds,ready=True)
 
         if not hasattr(cont,"add"):
-            raise RuntimeError("could not create topic in {}".format(const.__class__.__name__))
+            raise RuntimeError("could not create topic in {}".format(cont.__class__.__name__))
 
         post = model.Post.new(text,user.uid,ds=self.ds)
         yield post.save()
