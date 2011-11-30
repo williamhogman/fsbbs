@@ -6,7 +6,7 @@ from ..data import datasource
 
 from parse import ParsedMessage
 from ..service import service
-from outgoing import ErrorMessage,NotificationMessage
+from outgoing import ErrorMessage,NotificationMessage,AuthFailedMessage
 from ..data.model import ThingNotFoundError
 
 
@@ -41,12 +41,12 @@ class Reply(ParsedMessage):
         user = yield get_user_by_addr(headers['From'])
 
         if user is None: 
-            ErrorMessage.reply_to(headers,body="User not found").send()
-
+            AuthFailedMessage.reply_to(headers).send()
             defer.returnValue(None)
         
         dash = self.to.find("-") + 1
         if not dash:
+            
             ErrorMessage.reply_to(headers,subject="Delivery failed",
                                   body="We could not find the intended recipient").send()
             defer.returnValue(None)
