@@ -42,6 +42,9 @@ class DataSource:
     def mget(self,*args):
         return self.api.mget(*args)
 
+    def hget(self,*args,**kwargs):
+        return self.api.hget(*args,**kwargs)
+
 # dsf is our singleton datasource factory
 dsf = DataSourceFactory()
 
