@@ -7,7 +7,7 @@ from ..data import datasource
 from parse import ParsedMessage
 from ..service import service
 from outgoing import ErrorMessage
-
+from ..data.model import ThingNotFoundError
 
 
 @defer.inlineCallbacks
@@ -51,7 +51,10 @@ class Reply(ParsedMessage):
             defer.returnValue(None)
             
         tid = int(self.to[dash:])
-        yield service.postToThing(tid,"\n".join(body),user)
+        try:
+            yield service.postToThing(tid,"\n".join(body),user)
+        except ThingNotFoundError:
+            ErrorMessage.reply_to(headers,body="Could not find the topic you were posting a reply to")
 
 
 class Post(ParsedMessage):
