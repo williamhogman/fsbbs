@@ -39,7 +39,7 @@ class OutgoingMessage(object):
         self.to = to 
         self.body =body
         self.headers = dict()
-        if topic is not None:
+        if subject is not None:
             self.headers["Subject"] = subject
     def send(self):
         _handler.send(self)
