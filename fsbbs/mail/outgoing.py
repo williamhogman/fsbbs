@@ -29,7 +29,7 @@ class OutgoingMessage(object):
 
     def add_header(self,name,val):
         self.headers[name] = val
-    def __init__(self,sender=None,to=None,body=None):
+    def __init__(self,sender=None,to=None,body=None,subject=None):
         self.sender = sender
         if isinstance(to,list):
             to = map(clean_addr,to)
@@ -39,6 +39,8 @@ class OutgoingMessage(object):
         self.to = to 
         self.body =body
         self.headers = dict()
+        if topic is not None:
+            self.headers["Subject"] = subject
     def send(self):
         _handler.send(self)
     def as_mime(self):
