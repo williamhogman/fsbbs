@@ -49,7 +49,6 @@ class Reply(ParsedMessage):
         if not dash:
             ErrorMessage.reply_to(headers,subject="Delivery failed",
                                   body="We could not find the intended recipient").send()
-            ErrorMessage(to=headers['From'],body="An id is required to post").send()
             defer.returnValue(None)
             
         tid = int(self.to[dash:])
