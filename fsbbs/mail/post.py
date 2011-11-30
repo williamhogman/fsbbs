@@ -6,7 +6,7 @@ from ..data import datasource
 
 from parse import ParsedMessage
 from ..service import service
-from outgoing import ErrorMessage
+from outgoing import ErrorMessage,NotificationMessage
 from ..data.model import ThingNotFoundError
 
 
@@ -54,9 +54,13 @@ class Reply(ParsedMessage):
         try:
             yield service.postToThing(tid,"\n".join(body),user)
         except ThingNotFoundError:
-            ErrorMessage.reply_to(headers,body=
+            ErrorMessage.reply_to(headers,subject="Could not post reply!",body=
                                   "Could not find the topic you were posting a reply to"
                                   ).send()
+        else:
+            NotificationMessage.reply_to(headers,subject="Your reply has been posted.",body=
+                                         "Your message has been posted"
+                                         ).send()
 
 
 class Post(ParsedMessage):

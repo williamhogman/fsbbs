@@ -60,6 +60,12 @@ class ErrorMessage(OutgoingMessage):
             sender = in_default_domain("error")
         OutgoingMessage.__init__(self,sender=sender,*args,**kwargs)
 
+class NotificationMessage(OutgoingMessage):
+    """ A message that notifies a user of something, where no action is required"""
+    def __init__(self,sender=None,*args,**kwargs):
+        if not sender:
+            sender = in_default_domain("noreply")
+        OutgoingMessage.__init__(self,sender=sender,*args,**kwargs)
 
 class SendmailHandler(object):
     def __init__(self):
