@@ -29,10 +29,12 @@ class BasicUsername:
 
     @defer.inlineCallbacks
     def call(self,chain):
-        
+        if not 'username' in chain:
+            return
+
         username = chain['username'].lower()
 
-        uid = yield self.datasource.get("username:{}:uid".format(chain['username']))
+        uid = yield self.datasource.get("username:{}:uid".format(username))
         if uid is not None:
             chain.uid = uid
         
