@@ -54,7 +54,9 @@ class Reply(ParsedMessage):
         try:
             yield service.postToThing(tid,"\n".join(body),user)
         except ThingNotFoundError:
-            ErrorMessage.reply_to(headers,body="Could not find the topic you were posting a reply to")
+            ErrorMessage.reply_to(headers,body=
+                                  "Could not find the topic you were posting a reply to"
+                                  ).send()
 
 
 class Post(ParsedMessage):
