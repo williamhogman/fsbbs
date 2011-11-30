@@ -31,7 +31,8 @@ chains = {"default": ["BannedModule",
                        "ChangeBasicPassword",
                        "SessionStorageModule"],
 
-          "session": ["SessionSecretModule"]
+          "session": ["SessionSecretModule"],
+          "email": ["EmailID","ValidUID"]
           }    
     
 
