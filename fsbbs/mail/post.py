@@ -41,12 +41,13 @@ class Reply(ParsedMessage):
         user = yield get_user_by_addr(headers['From'])
 
         if user is None: 
-            ErrorMessage("User not found").send(headers['From'])
+            ErrorMessage.reply_to(headers,body="User not found").send()
+
             defer.returnValue(None)
         
         dash = self.to.find("-") + 1
         if not dash:
-            ErrorMessage("An id is required to post").send(headers['From'])
+            ErrorMessage(to=headers['From'],body="An id is required to post").send()
             defer.returnValue(None)
             
         tid = int(self.to[dash:])
