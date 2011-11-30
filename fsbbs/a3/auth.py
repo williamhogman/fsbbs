@@ -24,8 +24,7 @@ chains = {"default": ["BannedModule",
           "changepassword": ["SessionSecretModule",
                              "BasicUsername",
                              "BasicPasswords",
-                             "DummyPasswords"
-                             ,"ChangeBasicPassword"],
+                             "ChangeBasicPassword"],
 
           "register": ["BasicUsername",
                        "RegisterUser",
