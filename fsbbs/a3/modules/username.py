@@ -52,25 +52,23 @@ class RegisterUser:
     def __init__(self,ds=None):
         self.datasource = ds if ds is not None else datasource.getDatasource()
 
+
+    def precondition(self,chain):
+        return 'username' in chain and not chain.failed
     @defer.inlineCallbacks
     def call(self,chain):
         # is the username taken
         if chain.uid is not None: # if there is a UID here we have to stop the process
             chain.failure = True
             return
-        elif not 'username' in chain or chain.failed:
-            return
-        
         
         chain.uid = uid = yield self.datasource.incr("user:next_uid")
-
 
         username = chain['username']
         # set up pointers between uname and pw
         self.datasource.set("username:{}:uid".format(username),uid)
 
         self.datasource.set("user:{}:username".format(uid),username)
-
 
         chain._success = True
         
