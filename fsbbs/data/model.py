@@ -5,14 +5,47 @@ from twisted.internet import defer
 from twisted.python import log
 
 from thing import Thing
-
+from types import RSet
 
 class ThingNotFoundError(RuntimeError):
     """ error to be raised when a thing cannot be found """
 
 
 
+class SubscriptionMixin(object):
+    """ Mixin providing an interface for subscribing"""
 
+    def __uid(self,user):
+        return user.uid if hasattr(user,"uid") else int(user)
+        
+
+    def is_subscriber(self,user):
+        """ 
+        determines if the passed in user is a subscriber. returns a
+        defered returning true or false
+        """
+        uid = self.__uid(user)
+        return self.datasource.sismember(self._key("subscribers"),uid)
+    def add_subscriber(self,user):
+        """ adds a user as a subscriber to this thing """
+        uid = self.__uid(user)
+        return self.datasource.sadd(self._key("subscribers"),uid)
+
+    def remove_subscriber(self,user):
+        """remove a subscriber """
+        uid = self.__uid(user)
+        return self.datasource.srem(self._key("subscribers"),uid)
+
+    def get_subscribers(self):
+        """ 
+        gets all subscribers, O(N) where N is the number of
+        memebers in the set. and N can get big in a large thread
+        """
+        return self.datasource.smembers(self._key("subscribers"))
+
+    def subscribers_as_rset(self):
+        return RSet(self.datasource,self._key("subscribers"))
+        
 
 class Container(Thing):
     """ A thing containing a sorted set of other things"""
@@ -34,7 +67,6 @@ class Container(Thing):
         """ adds a pointer to the passed in thing this operation does not wait for save"""
         self.contents.append(thing)
         yield self.datasource.zadd(self._key("contents"),score,tid)
-
     def get_contents(self):
         """gets the contents of the container"""
         return manyFromIds(self.contents,self.datasource,ready=True)
@@ -93,7 +125,7 @@ class Container(Thing):
 
             defer.returnValue(bs)
 
-class Topic(Container):
+class Topic(Container,SubscriptionMixin):
     """ A topic is a list of post with one original post and poster"""
     def __init__(self,tid,*args,**kwargs):
         super(Topic,self).__init__(tid,*args,**kwargs)
@@ -105,6 +137,7 @@ class Topic(Container):
         if tid>0:
             self.ready.addCallback(onReady)
         
+
     @defer.inlineCallbacks
     def asDict(self,bs=None,**kwargs):
         """gets the topic as a dict"""
