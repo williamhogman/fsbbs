@@ -11,7 +11,7 @@ class RedisType(object):
         else:
             self.key = key
 
-class RSet(object):
+class RSet(RedisType):
     def add(self,*items):
         return self.datasource.sadd(self.key,*items)
 
