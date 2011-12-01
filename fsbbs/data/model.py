@@ -101,8 +101,7 @@ class Topic(Container):
         def onReady(a):
             # the original post that started the topic
             self.original_post,self.title = yield self._mget("original_post","title")
-            #self.original_post = yield self._get("original_post")
-            #self.title = yield self._get("title")
+
         if tid>0:
             self.ready.addCallback(onReady)
         
