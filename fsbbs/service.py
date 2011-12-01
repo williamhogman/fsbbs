@@ -56,6 +56,15 @@ class BBSService(object):
         else:
             defer.returnValue({"thing": (yield thing.asDict(contentsParsed=True))})
             
+            
+    def _subscribe_to(self,user,thing):
+        if hasattr(thing,"add_subscriber"):
+            return thing.add_subscriber(user)
+    def _unsubscribe(self,user,thing):
+        if hasattr(thing,"remove_subscriber"):
+            return thing.remove_subscriber(user)
+
+
     @defer.inlineCallbacks
     def postToThing(self,tid,text,user):
         """
@@ -67,6 +76,7 @@ class BBSService(object):
             raise RuntimeError("could not add post to {}".format(cont.__class__.__name__))
 
         yield post.save()
+        self._subscribe_to(user,cont)
         yield cont.add(post.tid)
 
     @defer.inlineCallbacks
@@ -84,6 +94,10 @@ class BBSService(object):
 
         topic = model.Topic.new(title,post)
         yield topic.save()
+
+        if user is not None:
+            self._subscribe_to(user,topic)
+
         
         yield cont.add(topic)
 
