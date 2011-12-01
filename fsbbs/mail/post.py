@@ -66,9 +66,37 @@ class Reply(ParsedMessage):
 
 class Post(ParsedMessage):
     """Email message containing a new topic"""
+    def __init__(self,to):
+        self.to = to
+        ParsedMessage.__init__(self)
 
-    def message_parsed(self,(header,body)):
-        return defer.succeed(None)
+    @defer.inlineCallbacks
+    def message_parsed(self,(headers,body)):
+        user = yield get_user_by_addr(headers['From'])
+        if user is None:
+            AuthFailedMessage.reply_to(headers)
+            defer.returnValue(None)
+        
+        dash = self.to.find("-") +1
+        if not dash:
+            ErrorMessage.reply_to(headers,subject="Delivery failed",
+                                  body="We could not find the intended recipient").send()
+            defer.returnValue(None)
+
+        tid = int(self.to[dash:])
+        try:
+            yield service.newTopic(tid,headers['Subject'],"\n".join(body),user)
+        except ThingNotFoundError:
+            ErrorMessage.reply_to(headers,subject="Could not post",
+                                  body=
+                                  """We were unable to post your message because we couldn't find the category"""
+                                  ).send()
+        else:
+            NotificationMessage.reply_to(headers,subject="Your topic has been posted",
+                                         body="The topic has been created")
+            
+
+        defer.succeed(None)
 
 
     
