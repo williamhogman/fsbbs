@@ -3,6 +3,7 @@ module providing access to the bbs
 """
 from .data import datasource,model
 from twisted.internet import defer
+from notify import NotificationManager,Notification
 
 class BBSService(object):
     """
@@ -11,6 +12,8 @@ class BBSService(object):
     def __init__(self,ds):
         self.ds = ds
         self._basicInfo = None
+
+        self._notify = NotificationManager()
 
     def _msg(self,msg,kind="msg"):
         return dict(msg=msg,kind=kind)
@@ -78,6 +81,8 @@ class BBSService(object):
         yield post.save()
         self._subscribe_to(user,cont)
         yield cont.add(post.tid)
+        self._notify.add(Notification(cont.subscribers_as_rset(),"new_reply",post))
+
 
     @defer.inlineCallbacks
     def newTopic(self,tid,title,text,user=None):
@@ -94,6 +99,7 @@ class BBSService(object):
 
         topic = model.Topic.new(title,post)
         yield topic.save()
+
 
         if user is not None:
             self._subscribe_to(user,topic)
