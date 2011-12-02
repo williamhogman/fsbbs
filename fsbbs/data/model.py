@@ -44,7 +44,7 @@ class SubscriptionMixin(object):
         return self.datasource.smembers(self._key("subscribers"))
 
     def subscribers_as_rset(self):
-        return RSet(self.datasource,self._key("subscribers"))
+        return RSet(self._key("subscribers"),self.datasource)
         
 
 class Container(Thing):
