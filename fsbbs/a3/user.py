@@ -8,7 +8,7 @@ class User(object):
     def _hash(self):
         return "user:{}".format(self.uid)
     def _hget(self,name):
-        return self.ds.hget(name)
+        return self.ds.hget(self._hash,name)
 
     def __init__(self,uid,datasource):
         if uid > 0:
