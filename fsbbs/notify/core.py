@@ -24,6 +24,9 @@ class NotificationManager(object):
     def __init__(self):
         self.managers = list()
         self.managers.append(ConsoleNM())
+        import email
+        em = email.EmailNotificationService()
+        self.managers.append(em)
 
     @defer.inlineCallbacks
     def add(self,notf):
