@@ -12,6 +12,7 @@ class RedisType(object):
             self.key = key
 
 class RSet(RedisType):
+
     def add(self,*items):
         return self.datasource.sadd(self.key,*items)
 
@@ -23,4 +24,12 @@ class RSet(RedisType):
     
     def is_memeber(self,item):
         return self.datasource.sismember(self.key,item)
+
+    def intersect(self,other):
+        if isinstance(other,str):
+            okey = other
+        else:
+            okey = other.key
+            
+        return self.datasource.sinter(self.key,okey)
 
