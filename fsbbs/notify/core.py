@@ -27,6 +27,7 @@ class NotificationManager(object):
 
     @defer.inlineCallbacks
     def add(self,notf):
+        """Adds a notification into the notification system"""
         defs = list()
         for manager in self.managers:
             defs.append(manager.process(notf))
