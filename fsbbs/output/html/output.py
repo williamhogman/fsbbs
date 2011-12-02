@@ -1,10 +1,17 @@
 from datetime import datetime,date
 from jinja2 import Environment, FileSystemLoader
-import markdown
+from functools import partial
 
-def markdownFilter(text):
-    """ jinja filter for rendering markdown, not async and very slow"""
-    return markdown.markdown(text,safe_mode=True)
+try:
+    import misaka
+except ImportError:
+    import markdown
+    _markdown = partial(markdown.markdown,safe_mode=True)
+else:
+    _markdown = partial(misaka.html,render_flags=misaka.HTML_SKIP_HTML)
+
+
+markdownFilter  = _markdown
 
 def dateFilter(dt):
     """ a human readable date"""
