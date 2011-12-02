@@ -1,6 +1,5 @@
-from jinja2 import Environment, FileSystemLoader
 from datetime import datetime,date
-from ...service import service
+from jinja2 import Environment, FileSystemLoader
 import markdown
 
 def markdownFilter(text):
