@@ -1,4 +1,4 @@
-from zope.interface import Interface,Attribute,implements
+from zope.interface import Interface,Attribute
 
 class IAuthModule(Interface):
     """ Interface that authmodule have to implement"""
