@@ -45,6 +45,10 @@ class DataSource:
     def hget(self,*args,**kwargs):
         return self.api.hget(*args,**kwargs)
 
+    def hmget(self,key,*args):
+        return self.api.hmget(key,args)
+        
+
     def sismember(self,key,member):
         return self.api.sismember(key,member)
 
@@ -56,6 +60,9 @@ class DataSource:
 
     def srem(self,key,*items):
         return self.api.srem(key,*items)
+
+    def sinter(self,*keys):
+        return self.api.sinter(*keys)
 
 # dsf is our singleton datasource factory
 dsf = DataSourceFactory()
