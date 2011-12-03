@@ -188,11 +188,12 @@ class Post(Thing):
         def onReady(a):
             self.poster_uid, self.text,self.pubdate_stamp= yield self._mget("poster_uid","text","pubdate")
             self.poster_name = yield usernameById(self.poster_uid,self.datasource)
-            #yield self.datasource.get("user:{}:username".format(self.poster_uid))
 
         if tid > 0:
             self.ready.addCallback(onReady)
     
+        
+
     @property
     def pubdate(self):
         """Gets the pubdate as a pythondate"""
@@ -219,6 +220,8 @@ class Post(Thing):
         p = Post(-1,ds)
 
         p.poster_uid = uid
+        p.poster_name = None
+
         p.text = text
         if pubdate is None:
             p.pubdate_stamp = time.time()
@@ -232,6 +235,9 @@ class Post(Thing):
 
     @defer.inlineCallbacks
     def asDict(self,bs=None,**kwargs):
+        if self.poster_uid is not None and self.poster_name is None:
+            self.poster_name = yield usernameById(self.poster_uid,self.datasource)
+
         d = {"poster_uid": self.poster_uid,"poster_name": self.poster_name,"text": self.text,"pubdate": self.pubdate}
         s = yield super(Post,self).asDict(bs=d,**kwargs)
         d.update(s)
@@ -307,7 +313,7 @@ def usernameById(userid,ds):
     if userid in user_cache:
         defer.returnValue(user_cache[userid])
     else:
-        user_cache[userid] = username = yield ds.get("user:{}:username".format(userid))
+        user_cache[userid] = username = yield ds.hget("user:{}".format(userid),"username")
         defer.returnValue(username)
     
     
