@@ -2,7 +2,7 @@
 from twisted.mail.smtp import sendmail
 from twisted.internet import defer
 from email.message import Message
-from .. import config
+from fsbbs import config
 
 in_default_domain = lambda user: "{}@{}".format(user,config.get("email.default_domain"))
 

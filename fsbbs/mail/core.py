@@ -2,8 +2,8 @@ from zope.interface import implements
 from twisted.internet import defer
 from twisted.mail.smtp import SMTPFactory, ESMTP,IMessageDelivery,IMessage,SMTPBadRcpt
 
-from parse import ParsedMessage
-import post
+from fsbbs.mail.parse import ParsedMessage
+from fsbbs.mail import post
 
 class EmailDelivery(object):
     """Class for routing emails the correct message class"""
