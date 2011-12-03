@@ -81,7 +81,7 @@ class BBSService(object):
         yield post.save()
         self._subscribe_to(user,cont)
         yield cont.add(post.tid)
-        self._notify.add(Notification(cont.subscribers_as_rset(),"new_reply",post))
+        self._notify.add(Notification(cont.subscribers_as_rset(),"new_reply",dict(thing=post,parent=cont)))
 
 
     @defer.inlineCallbacks

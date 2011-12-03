@@ -4,6 +4,7 @@ from twisted.internet import defer
 from email.message import Message
 from fsbbs import config
 
+
 in_default_domain = lambda user: "{}@{}".format(user,config.get("email.default_domain"))
 
 def clean_addr(addr):
@@ -52,7 +53,21 @@ class OutgoingMessage(object):
             msg[k] = v
 
         return msg
-        
+
+class MimeWrap(object):
+    def __init__(self,mime,sender,to):
+        if isinstance(to,list):
+            to = map(clean_addr,to)
+        else:
+            to =clean_addr(to)
+        self.to = to
+        self.sender = sender
+        self.mime = mime
+    def as_mime(self):
+        return self.mime
+    def send(self):
+        _handler.send(self)
+
 
 class ErrorMessage(OutgoingMessage):
     def __init__(self,sender=None,*args,**kwargs):
