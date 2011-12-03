@@ -159,8 +159,6 @@ class Topic(Container,SubscriptionMixin):
             defer.returnValue(bs)
 
 
-    
-
     @staticmethod
     def new(title,original_post,ds=None):
         """ creates a new topic (as opposed to just an representation of a preexisting one """
@@ -230,8 +228,11 @@ class Post(Thing):
 
         return p
 
-        
-
+    @defer.inlineCallbacks
+    def get_poster_name(self):
+        if self.poster_uid is not None and self.poster_name is None:
+            self.poster_name = yield usernameById(self.poster_uid,self.datasource)
+        defer.returnValue(self.poster_name)
 
     @defer.inlineCallbacks
     def asDict(self,bs=None,**kwargs):
