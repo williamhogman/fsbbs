@@ -3,9 +3,8 @@ smtp:
   host: localhost
 email:
   default_domain: "lists.fsbbs.org"
+  theme_plain: default_mail_plain
 redis:
   host: 127.0.0.1
   port: 6379
   pool_size: 2
-  
-  
