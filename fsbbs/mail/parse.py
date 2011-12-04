@@ -1,3 +1,6 @@
+"""
+Module containing classes for parsing incoming messages.
+"""
 
 class MessageParser(object):
     """ Class for parsing messages as they come in over the wire"""
@@ -11,12 +14,12 @@ class MessageParser(object):
         self.headers =  dict()
         self._in_body = False
 
-    def _add_header(self,header):
-        name,val = self._parse_header(header)
+    def _add_header(self, header):
+        name, val = self._parse_header(header)
         self.headers[name] = val
 
 
-    def _parse_from(self,hdr):
+    def _parse_from(self, hdr):
         hdr = hdr.strip()
         print(hdr)
         start = hdr.find("<")
@@ -31,17 +34,17 @@ class MessageParser(object):
             return hdr
             
             
-    def _parse_header(self,header):
+    def _parse_header(self, header):
         separator = header.find(":")
         name = header[:separator]
         value = header[separator+1:].lstrip()
         # headers are not case-sensitive, but servers usually correct it
         if name.lower() == "from": 
-            return (name,self._parse_from(value))
+            return (name, self._parse_from(value))
             
-        return (name,value)
+        return (name, value)
 
-    def feed(self,line):
+    def feed(self, line):
         """ feeds a line into the message parser"""
         # empty line not in body
         if not self._in_body and not line:
@@ -53,7 +56,7 @@ class MessageParser(object):
 
     def get(self): 
         """ Gets the headers and body of the message being parsed """
-        return (self.headers,self.lines)
+        return (self.headers, self.lines)
 
     def get_and_reset(self):
         """ gets the data and resets the parser to its initial state"""
@@ -62,19 +65,35 @@ class MessageParser(object):
         return rtn
 
 class ParsedMessage(object):
-    """ A message that is parsed using a message parser. message_parsed is called """
+    """ 
+    A message that is parsed using a message parser. message_parsed is
+    called.
+    """
     def __init__(self):
         self.parser = MessageParser()
 
-    def lineReceived(self,line):
+    def lineReceived(self, line):
+        """
+        Called when a line new line of input is available.
+        """
         self.parser.feed(line)
         
     def eomReceived(self):
+        """
+        called when the message has been parsed returns a deferred
+        that fires when fsbbs has taken action based on the message.
+        """
         return self.message_parsed(self.parser.get_and_reset())
 
     def connectionLost(self):
+        """ 
+        Called when the connection to the client has been lost.
+        Resets the state of internal parser
+        """
         self.parser.reset()
 
-    def message_parsed(self,msg):
-        """ Override this in your subclass to get the message when it has been parsed"""
-        pass
+    def message_parsed(self, msg):
+        """ 
+        Override this in your subclass to get the message when it has
+        been parsed.
+        """
