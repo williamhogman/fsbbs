@@ -6,9 +6,9 @@ from ..data import datasource
 
 from parse import ParsedMessage
 from ..service import service
-from outgoing import ErrorMessage,NotificationMessage,AuthFailedMessage
+from outgoing import MimeWrap
 from ..data.model import ThingNotFoundError
-
+from fsbbs.output.mail import Output
 
 @defer.inlineCallbacks
 def get_uid_by_addr(sender):
@@ -28,73 +28,72 @@ def get_user_by_addr(sender):
     return get_uid_by_addr(sender).addCallback(inner)
 
         
-
-class Reply(ParsedMessage):
-    """ E-mail message containing a reply to a topic"""
-
+class RoutedMessage(ParsedMessage):
+    """ E-mail messagw with routing information """
+    
     def __init__(self,to):
         self.to = to
         ParsedMessage.__init__(self)
+
+    @defer.inlineCallbacks
+    def reply(self,headers,template,data=dict()):
+        msg = yield Output.render_message(template,data)
+        MimeWrap(msg,msg['From'],headers['From']).reply_of(headers).send()
+        defer.returnValue(None)
+
+    def send_auth_failed(self,headers):
+        return self.reply(headers,"user_not_found")
+
+        
+    
+
+class Reply(RoutedMessage):
+    """ E-mail message containing a reply to a topic"""
 
     @defer.inlineCallbacks
     def message_parsed(self,(headers,body)):
         user = yield get_user_by_addr(headers['From'])
 
         if user is None: 
-            AuthFailedMessage.reply_to(headers).send()
+            self.send_auth_failed(headers)
             defer.returnValue(None)
-        
-        dash = self.to.find("-") + 1
-        if not dash:
-            
-            ErrorMessage.reply_to(headers,subject="Delivery failed",
-                                  body="We could not find the intended recipient").send()
+
+        try:
+            tid = int(self.to[self.to.find("-") + 1:])
+        except:
+            self.reply(headers,"delivery_failed",dict(to_addr=self.to))
             defer.returnValue(None)
             
-        tid = int(self.to[dash:])
         try:
             yield service.postToThing(tid,"\n".join(body),user)
         except ThingNotFoundError:
-            ErrorMessage.reply_to(headers,subject="Could not post reply!",body=
-                                  "Could not find the topic you were posting a reply to"
-                                  ).send()
+            self.reply(headers,"thing_not_found",dict(tid=tid))
         else:
-            NotificationMessage.reply_to(headers,subject="Your reply has been posted.",body=
-                                         "Your message has been posted"
-                                         ).send()
+            self.reply(headers,"reply_successful")
 
 
-class Post(ParsedMessage):
+class Post(RoutedMessage):
     """Email message containing a new topic"""
-    def __init__(self,to):
-        self.to = to
-        ParsedMessage.__init__(self)
 
     @defer.inlineCallbacks
     def message_parsed(self,(headers,body)):
         user = yield get_user_by_addr(headers['From'])
         if user is None:
-            AuthFailedMessage.reply_to(headers)
+            self.send_auth_failed()
             defer.returnValue(None)
         
-        dash = self.to.find("-") +1
-        if not dash:
-            ErrorMessage.reply_to(headers,subject="Delivery failed",
-                                  body="We could not find the intended recipient").send()
+        try:
+            tid = int(self.to[self.to.find("-") + 1:])
+        except:
+            self.reply(headers,"delivery_failed",dict(to_addr=self.to))
             defer.returnValue(None)
 
-        tid = int(self.to[dash:])
         try:
             yield service.newTopic(tid,headers['Subject'],"\n".join(body),user)
         except ThingNotFoundError:
-            ErrorMessage.reply_to(headers,subject="Could not post",
-                                  body=
-                                  """We were unable to post your message because we couldn't find the category"""
-                                  ).send()
+            self.reply(headers,"thing_not_found",dict(tid=tid))
         else:
-            NotificationMessage.reply_to(headers,subject="Your topic has been posted",
-                                         body="The topic has been created")
-            
+            self.reply(headers,"post_successful")
 
         defer.succeed(None)
 

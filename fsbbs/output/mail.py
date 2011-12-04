@@ -5,7 +5,7 @@ from twisted.internet import defer
 import fsbbs.config
 from fsbbs import config
 from fsbbs.output.template import TemplateEngine
-from fsbbs.mail.outgoing import  MimeWrap,clean_addr
+from fsbbs.mail.outgoing import  clean_addr
 
 class PlainTextFormatter(TemplateEngine):
     def __init__(self):
@@ -21,6 +21,10 @@ class MailOutput(object):
     def __init__(self):
         self._plain = PlainTextFormatter()
         self._subject_format = config.get("email.subject_format")
+
+    def _subject_line(self,subj):
+        return self._subject_format.format(subj)
+
     @defer.inlineCallbacks
     def render_message(self,template,data):
         msg = MIMEMultipart("alternative")
@@ -29,8 +33,18 @@ class MailOutput(object):
             parent = data["parent"]
             poster = yield thing.get_poster_name()
             msg['From'] = "{} <{}>".format(poster,clean_addr("user-"+poster))
-            msg['Subject'] = self._subject_format.format(parent.title)
+            msg['Subject'] = self._subject_line(parent.title)
             msg['Reply-To'] = clean_addr("reply-{}".format(parent.tid))
+        elif template ==  "delivery_failed":
+            msg["Subject"] = self._subject_line("Message Delivery Failed")
+        elif template == "thing_not_found":
+            msg['Subject'] = self._subject_line("Unable to find post")
+        elif template == "reply_successful":
+            msg['Subject'] = self._subject_line("Your reply has been posted")
+        elif template == "post_successful":
+            msg['Subject'] = self._subject_line("Your topic has been posted")
+        if not "From" in msg:
+            msg['From'] = clean_addr("noreply")
         msg.attach(MIMEText(self.render_plain_body(template,data),"plain"))
         defer.returnValue(msg)
         
