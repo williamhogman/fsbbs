@@ -1,25 +1,30 @@
-from zope.interface import implements
-from twisted.internet import defer
-from twisted.mail.smtp import SMTPFactory, ESMTP,IMessageDelivery,IMessage,SMTPBadRcpt
+"""
+Core components in the incoming mail system
+"""
 
-from fsbbs.mail.parse import ParsedMessage
+from zope.interface import implements
+from twisted.mail.smtp import SMTPFactory, ESMTP, IMessageDelivery
+from twisted.mail.smtp import SMTPBadRcpt
+
 from fsbbs.mail import post
+
 
 class EmailDelivery(object):
     """Class for routing emails the correct message class"""
     implements(IMessageDelivery)
 
-    def receivedHeader(self,helo,origin,recipients):
+    def receivedHeader(self, helo, origin, recipients):
+        """ Adds our Received header """
         return "Received: EmailDelivery"
 
     def validateFrom(self, helo, origin):
-        # All addresses are accepted
-        return origin
-    def validateTo(self,user):
-
-        if user.dest.local == "test":
-            return lambda: CommandMessage()
-        elif user.dest.local.startswith("reply-"):
+        """ 
+        validates origins, for now we don't do any verification,
+        use a proxy for that return origin
+        """
+    def validateTo(self, user):
+        """ validates the incoming addresses """
+        if user.dest.local.startswith("reply-"):
             return lambda: post.Reply(user.dest.local)
         elif user.dest.local.startswith("post-"):
             return lambda: post.Post(user.dest.local)
@@ -27,30 +32,17 @@ class EmailDelivery(object):
 
 
 
-
-class CommandMessage(ParsedMessage):
-    implements(IMessage)
-
-    def message_parsed(self,(headers,lines)):
-        print(headers)
-        print(lines)
-        return defer.succeed(None)
-
-
-    
-    
-    
-
 class EmailInterfaceFactory(SMTPFactory):
     """ Factory class for the fsbbs smtp server"""
     protocol = ESMTP
-    def __init__(self,*a,**kw):
-        SMTPFactory.__init__(self,*a,**kw)
+    def __init__(self, *a, **kw):
+        SMTPFactory.__init__(self, *a, **kw)
         self.delivery = EmailDelivery()
-    def buildProtocol(self,addr):
-        p = SMTPFactory.buildProtocol(self,addr)
-        p.delivery = self.delivery
-        return p
+
+    def buildProtocol(self, addr):
+        proto = SMTPFactory.buildProtocol(self, addr)
+        proto.delivery = self.delivery
+        return proto
 
 
 
