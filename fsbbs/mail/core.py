@@ -22,6 +22,8 @@ class EmailDelivery(object):
         validates origins, for now we don't do any verification,
         use a proxy for that return origin
         """
+        return True
+
     def validateTo(self, user):
         """ validates the incoming addresses """
         if user.dest.local.startswith("reply-"):
