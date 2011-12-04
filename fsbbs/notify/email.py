@@ -5,9 +5,9 @@ from twisted.internet import defer
 from twisted.python import log
 from zope.interface import implements
 from interface import INotificationService
-from ..data import datasource 
-from ..mail import outgoing
-from ..a3.user import User
+from fsbbs.data import datasource 
+from fsbbs.mail import outgoing
+from fsbbs.a3.user import User
 from fsbbs.output import mail
 
 
