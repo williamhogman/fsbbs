@@ -7,6 +7,7 @@ def _load():
 _data = _load()
 
 def get(key):
+    """ Gets a value from the config"""
     parts = key.split(".")
     
     cur = _data[parts[0]]
