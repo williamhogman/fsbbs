@@ -1,4 +1,6 @@
+import sys
 from twisted.internet import defer
+from twisted.python import log
 
 class Notification(object):
     """ A notification """
@@ -27,6 +29,9 @@ class NotificationManager(object):
         import email
         em = email.EmailNotificationService()
         self.managers.append(em)
+        import im
+        n = im.IMNotificationService()
+        self.managers.append(n)
 
     @defer.inlineCallbacks
     def add(self,notf):
