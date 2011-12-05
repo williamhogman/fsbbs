@@ -103,6 +103,9 @@ class BBSService(object):
 
         if user is not None:
             self._subscribe_to(user,topic)
+        self._notify.add(Notification(topic.subscribers_as_rset(),
+                                      "new_topic",
+                                      dict(thing=post,topic=topic,parent=cont)))
 
         
         yield cont.add(topic)
