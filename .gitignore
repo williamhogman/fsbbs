@@ -13,6 +13,9 @@ sdist
 develop-eggs
 .installed.cfg
 
+#twisted
+dropin.cache
+
 # Installer logs
 pip-log.txt
 
