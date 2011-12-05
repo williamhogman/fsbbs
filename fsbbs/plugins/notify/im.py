@@ -1,17 +1,18 @@
 """
-Notification module for twisted.words.im
+Notifcation module for InstantMessaging and IRC
 """
 from zope.interface import implements
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol, defer
-
+from twisted.python import log
+from twisted.plugin import IPlugin
 from fsbbs.notify.interface import INotificationService
 from fsbbs import config
 
 
 class NotifyIRCBot(irc.IRCClient):
     """IRC bot sending fsbbs notifications"""
-    
+
     def __init__(self, nickname, realname):
         self.nickname = nickname
         self.realname = realname
@@ -78,7 +79,7 @@ class NotifyIRCBotFactory(protocol.ClientFactory):
         connector.connect()
 
     def clientConnectionFailed(self, connector, reason):
-        print("Connection failure for irc notify")
+        log.msg("Connection failure for irc notify")
 
     def announce(self,message):
         self.client.announce(message)
@@ -86,7 +87,10 @@ class NotifyIRCBotFactory(protocol.ClientFactory):
 
 
 class IMNotificationService(object):
-    implements(INotificationService)
+    """
+    NotificationService for IM and IRC. 
+    """
+    implements(IPlugin,INotificationService)
     
     handles = ["new_topic","new_reply"]
 
@@ -119,3 +123,4 @@ class IMNotificationService(object):
             server.announce(message)
         return defer.succeed(None)
 
+IMNotf = IMNotificationService()
