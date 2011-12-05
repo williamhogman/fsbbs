@@ -28,9 +28,9 @@ class MailOutput(object):
     @defer.inlineCallbacks
     def render_message(self,template,data):
         msg = MIMEMultipart("alternative")
-        if template == "new_reply":
+        if template == "new_reply" or template == "new_topic":
             thing = data["thing"]
-            parent = data["parent"]
+            parent = data["parent"] if template == "new_reply" else data["topic"]
             poster = yield thing.get_poster_name()
             msg['From'] = "{} <{}>".format(poster,clean_addr("user-"+poster))
             msg['Subject'] = self._subject_line(parent.title)
