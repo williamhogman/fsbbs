@@ -1,6 +1,8 @@
 import sys
 from twisted.internet import defer
 from twisted.python import log
+from twisted.plugin import getPlugins
+from fsbbs.notify.interface import INotificationService
 
 class Notification(object):
     """ A notification """
@@ -9,23 +11,14 @@ class Notification(object):
         self.kind = kind
         self.obj = obj
 
-notificationManagers = dict()
-
-class ConsoleNM(object):
-    @defer.inlineCallbacks
-    def process(self,ntf):
-        print("{} with {} to {}".format(
-                ntf.kind,
-                ntf.obj,
-                (yield ntf.recp.get())
-                ))
-
 
 class NotificationManager(object):
     """ Manages the sending of notifications."""
     def __init__(self):
         self.managers = list()
-        self.managers.append(ConsoleNM())
+        import fsbbs.plugins.notify as plugins
+        mgrs = getPlugins(INotificationService,plugins)
+        self.managers += mgrs
         import email
         em = email.EmailNotificationService()
         self.managers.append(em)
