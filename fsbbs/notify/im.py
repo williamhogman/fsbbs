@@ -26,38 +26,29 @@ class NotifyIRCBot(irc.IRCClient):
 
 
     def signedOn(self):
-        """Called when bot has succesfully signed on to server."""
+        """Called when connected joins our channels."""
         map(self.join,self.factory.channels)
 
     def joined(self, channel):
-        """This will get called when the bot joins the channel."""
+        """When the bot joins a channel, does nothing in our case."""
 
 
     def privmsg(self, user, channel, msg):
-        """This will get called when the bot receives a message."""
+        """This will get called when the bot receives a message. For now just tell them we are fsbbs"""
         user = user.split('!', 1)[0]
-        
-        # Check to see if they're sending me a private message
+        msg = "I'm the fsbbs IRC-bot!"
         if channel == self.nickname:
-            msg = "I'm the fsbbs IRC-bot!"
             self.msg(user, msg)
             return
 
-        # Otherwise check to see if it is a message directed at me
         if msg.startswith(self.nickname + ":"):
-            self.msg(channel, "I'm the fsbbs IRC-bot")
-
-    def action(self, user, channel, msg):
-        """This will get called when the bot sees someone do an action."""
-        user = user.split('!', 1)[0]
+            self.msg(channel, msg)
 
     def announce(self,message):
         for chan in self.factory.channels:
             self.say(chan,message,256)
         
 
-    # For fun, override the method that determines how a nickname is changed on
-    # collisions. The default method appends an underscore.
     def alterCollidedNick(self, nickname):
         """
         Generate an altered version of a nickname that caused a collision in an
@@ -69,8 +60,7 @@ class NotifyIRCBot(irc.IRCClient):
 
 class NotifyIRCBotFactory(protocol.ClientFactory):
     """
-    Factory for IrcNotifyBot
-    A new protocol instance will be created each time we connect to the server.
+    Factory keeping track of our connection to an irc server
     """
 
     def __init__(self, nick, realname, channels):
@@ -97,6 +87,8 @@ class NotifyIRCBotFactory(protocol.ClientFactory):
 
 class IMNotificationService(object):
     implements(INotificationService)
+    
+    handles = ["new_topic","new_reply"]
 
     def __init__(self):
         server_conf = config.get("notify.im.servers")
@@ -110,8 +102,20 @@ class IMNotificationService(object):
                 reactor.connectTCP(server["hostname"],server["port"],bot)
             self.servers.append(bot)
 
+    def _handle_new_topic(self,notf):
+        title = notf.obj["topic"].title
+        return "New topic - {}".format(title)
+    def _handle_new_reply(self,notf):
+        title = notf.obj["parent"].title
+        return "A reply has been made to '{}'".format(title)
+    
     def process(self,notf):
+        if notf.kind in self.handles:
+            message = getattr(self,"_handle_"+notf.kind)(notf)
+        else:
+            return defer.succeed(None)
+
         for server in self.servers:
-            server.announce(notf.kind)
-        return defer.returnValue(None)
+            server.announce(message)
+        return defer.succeed(None)
 
