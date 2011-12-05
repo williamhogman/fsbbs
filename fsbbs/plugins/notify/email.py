@@ -2,9 +2,9 @@
 Notifications via email
 """
 from twisted.internet import defer
-from twisted.python import log
+from twisted.plugin import IPlugin
 from zope.interface import implements
-from interface import INotificationService
+from fsbbs.notify.interface import INotificationService
 from fsbbs.data import datasource 
 from fsbbs.mail import outgoing
 from fsbbs.a3.user import User
@@ -12,7 +12,8 @@ from fsbbs.output import mail
 
 
 class EmailNotificationService(object):
-    implements(INotificationService)
+    """ Email notifier """
+    implements(IPlugin,INotificationService)
     @defer.inlineCallbacks
     def process(self,notf):
         ds = datasource.getDatasource()
@@ -35,5 +36,5 @@ class EmailNotificationService(object):
             if user.email is None:
                 continue
             outgoing.MimeWrap(message,sender,user.email).send()
-        
-        
+
+ems = EmailNotificationService()

@@ -19,9 +19,6 @@ class NotificationManager(object):
         import fsbbs.plugins.notify as plugins
         mgrs = getPlugins(INotificationService,plugins)
         self.managers += mgrs
-        import email
-        em = email.EmailNotificationService()
-        self.managers.append(em)
         import im
         n = im.IMNotificationService()
         self.managers.append(n)
