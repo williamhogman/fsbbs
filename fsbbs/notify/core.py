@@ -19,9 +19,6 @@ class NotificationManager(object):
         import fsbbs.plugins.notify as plugins
         mgrs = getPlugins(INotificationService,plugins)
         self.managers += mgrs
-        import im
-        n = im.IMNotificationService()
-        self.managers.append(n)
 
     @defer.inlineCallbacks
     def add(self,notf):
