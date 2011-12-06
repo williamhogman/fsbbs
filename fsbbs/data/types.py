@@ -7,9 +7,20 @@ class RedisType(object):
     def __init__(self,key,ds):
         self.datasource = ds
         if isinstance(key,collections.Callable):
-            self.key = property(key)
+            self._key = key
         else:
-            self.key = key
+            self._key = lambda: key
+
+    @property
+    def key(self):
+        return self._key()
+
+    def as_key_freeze(self):
+        """
+        Returns a version with the key to frozen to its current value.
+        """
+        return self.__class__(self._key(),self.datasource) 
+        
 
 class RSet(RedisType):
 
