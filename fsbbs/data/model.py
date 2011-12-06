@@ -6,6 +6,7 @@ from twisted.python import log
 
 from thing import Thing
 from types import RSet
+from functools import partial
 
 class ThingNotFoundError(RuntimeError):
     """ error to be raised when a thing cannot be found """
@@ -17,7 +18,13 @@ class SubscriptionMixin(object):
 
     def __uid(self,user):
         return user.uid if hasattr(user,"uid") else int(user)
-        
+
+    @property
+    def __subs(self):
+        if not hasattr(self,"_subs_cache_"):
+            self._subs_cache_ = RSet(partial(self._key,"subscribers"),
+                                     self.datasource)
+        return self._subs_cache_
 
     def is_subscriber(self,user):
         """ 
@@ -25,26 +32,19 @@ class SubscriptionMixin(object):
         defered returning true or false
         """
         uid = self.__uid(user)
-        return self.datasource.sismember(self._key("subscribers"),uid)
+        return self.__subs.is_member(uid)
     def add_subscriber(self,user):
         """ adds a user as a subscriber to this thing """
         uid = self.__uid(user)
-        return self.datasource.sadd(self._key("subscribers"),uid)
+        return self.__subs.add(uid)
 
     def remove_subscriber(self,user):
         """remove a subscriber """
         uid = self.__uid(user)
-        return self.datasource.srem(self._key("subscribers"),uid)
-
-    def get_subscribers(self):
-        """ 
-        gets all subscribers, O(N) where N is the number of
-        memebers in the set. and N can get big in a large thread
-        """
-        return self.datasource.smembers(self._key("subscribers"))
+        return self.__subs.remove(uid)
 
     def subscribers_as_rset(self):
-        return RSet(self._key("subscribers"),self.datasource)
+        return self.__subs
         
 
 class Container(Thing):
