@@ -4,7 +4,7 @@ submodule for redis types
 import collections
 from itertools import imap, ifilter
 
-class RedisType(object):
+class RType(object):
     def __init__(self,key,ds):
         self.datasource = ds
         if isinstance(key,collections.Callable):
@@ -22,7 +22,7 @@ class RedisType(object):
         """
         return self.__class__(self._key(),self.datasource) 
         
-class RedisCollectionType(RedisType):
+class RCollection(RType):
     """ base-class for all redis collection types """
 
     def map(self, fn):
@@ -42,7 +42,7 @@ class RedisCollectionType(RedisType):
 
     
 
-class RSet(RedisCollectionType):
+class RSet(RCollection):
 
     def add(self,*items):
         return self.datasource.sadd(self.key,*items)
@@ -63,4 +63,5 @@ class RSet(RedisCollectionType):
             okey = other.key
             
         return self.datasource.sinter(self.key,okey)
+
 
