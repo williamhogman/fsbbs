@@ -2,6 +2,7 @@
 submodule for redis types
 """
 import collections
+from itertools import imap, ifilter
 
 class RedisType(object):
     def __init__(self,key,ds):
@@ -21,8 +22,27 @@ class RedisType(object):
         """
         return self.__class__(self._key(),self.datasource) 
         
+class RedisCollectionType(RedisType):
+    """ base-class for all redis collection types """
 
-class RSet(RedisType):
+    def map(self, fn):
+        """ 
+        returns a deferred an imap for the passed in function on the
+        items.
+        """
+        return self.get().addCallback(lambda col: imap(fn, col))
+
+    def filter(self, fn):
+        """
+        returns a deferred returning an ifilter for the passed in
+        function on the items.
+        """
+        return self.get().addCallback(lambda col: ifilter(fn, col))
+
+
+    
+
+class RSet(RedisCollectionType):
 
     def add(self,*items):
         return self.datasource.sadd(self.key,*items)
