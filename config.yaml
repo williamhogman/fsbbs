@@ -1,13 +1,13 @@
 http:
   port: 3037
   enable: yes
-smtp:
-  handler: Sendmail
-  host: localhost
 email:
   default_domain: "lists.fsbbs.org"
   theme_plain: default_mail_plain
   subject_format: "[fsbbs] - {}"
+  outgoing:
+    provider: txSendmail
+    host: localhost
   incoming:
     enable: yes
     port: 2500

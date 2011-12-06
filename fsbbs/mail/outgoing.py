@@ -1,9 +1,9 @@
 """
 Submodule for outgoing emails
 """
-from twisted.mail.smtp import sendmail
-from twisted.internet import defer
+from twisted.plugin import getPlugins
 from fsbbs import config
+from fsbbs.mail.interface import IOutgoingMailProvider
 
 def in_default_domain(user):
     """ Gets a user in default domain """
@@ -15,7 +15,6 @@ def clean_addr(addr):
         return addr # valid
     else:
         return in_default_domain(addr)
-
 
 
 class MimeWrap(object):
@@ -51,26 +50,13 @@ class MimeWrap(object):
         return self # chaining
 
 
-class SendmailHandler(object):
-    """ Handler for Sendmail """
-
-    def __init__(self):
-        self.smtpserv = config.get("smtp.host")
-
-    @defer.inlineCallbacks
-    def send(self, message):
-        """ Sends the message using twisted """
-        yield sendmail(self.smtpserv,
-                       message.sender,
-                       message.to,message.as_mime())
-        
-        
-
 def _get_handler():
-    import sys
-    
-    return getattr(sys.modules[__name__], config.get("smtp.handler") + "Handler")
+    import fsbbs.plugins.mail as plugins
+    plugins = getPlugins(IOutgoingMailProvider,plugins)
+    name = config.get("email.outgoing.provider")
+    for plugin in plugins:
+        if plugin.__class__.__name__ == name:
+            return plugin
 
 
-_Handler = _get_handler()
-_handler = _Handler()
+_handler = _get_handler()
