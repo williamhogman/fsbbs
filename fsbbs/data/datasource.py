@@ -16,7 +16,7 @@ class DataSourceFactory:
     def getConnection(self):
         return DataSource((self.api))
 
-class DataSource:
+class DataSource(object):
     """
     Thin wrapper around the redis api If you wanna do mockups or
     provide a different database backend just make your own datasource
