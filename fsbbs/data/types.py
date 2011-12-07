@@ -2,7 +2,8 @@
 submodule for redis types
 """
 import collections
-from itertools import imap, ifilter
+from itertools import imap, ifilter,chain
+
 
 class RType(object):
     def __init__(self,key,ds):
@@ -40,8 +41,6 @@ class RCollection(RType):
         return self.get().addCallback(lambda col: ifilter(fn, col))
 
 
-    
-
 class RSet(RCollection):
 
     def add(self,*items):
@@ -65,3 +64,31 @@ class RSet(RCollection):
         return self.datasource.sinter(self.key,okey)
 
 
+class RHash(RType):
+    """
+    Representation of a redis hash
+    """
+
+    def get(self,key):
+        """ Gets a field from the hash """
+        return self.datasource.hget(self.key,key)
+
+    def mget(self,*fields):
+        """ Gets multiple fields """
+        if len(fields) == 1:
+            return self.get(fields[0])
+        else:
+            return self.datasource.hmget(self.key,*fields)
+
+    def set(self,field,val):
+        """ sets a hash field """
+        return self.datasource.hset(self.key,field)
+
+    def mset(self,*pairs):
+        array = chain(*pairs)
+        return self.datasource.hmset(self.key,*array)
+    
+    
+
+        
+        
