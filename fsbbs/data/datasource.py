@@ -48,7 +48,12 @@ class DataSource:
     def hmget(self,key,*args):
         return self.api.hmget(key,args)
         
+    def hset(self,key,field,val):
+        return self.api.hset(key,field,val)
 
+    def hmset(self,key,*args):
+        return self.api.hmset(key,*args)
+    
     def sismember(self,key,member):
         return self.api.sismember(key,member)
 
