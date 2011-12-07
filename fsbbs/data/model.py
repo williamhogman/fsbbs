@@ -67,32 +67,10 @@ class Container(Thing):
         """ adds a pointer to the passed in thing this operation does not wait for save"""
         self.contents.append(thing)
         yield self.datasource.zadd(self._key("contents"),score,tid)
+
     def get_contents(self):
         """gets the contents of the container"""
         return manyFromIds(self.contents,self.datasource,ready=True)
-        defs = list()
-        for tid in self.contents:
-            ## yo dawg so i herd u liek async!
-            d = anythingFromId(tid,self.datasource,ready=True)
-
-            def onError(err):
-                log.msg("Thing {} not found in {}".format(tid,self.tid))
-                return False
-
-            d.addErrback(onError)
-            defs.append(d)
-
-        dl = defer.DeferredList(defs)
-        def process(result):
-            res = list()
-            for (status, val) in result:
-                if status and val:
-                    res.append(val)
-
-            return res
-
-        dl.addCallback(process)
-        return dl
                     
                 
     @defer.inlineCallbacks
