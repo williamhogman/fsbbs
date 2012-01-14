@@ -69,7 +69,7 @@ class NewTopic(BaseHandler,SessionAuthMixin):
 
             
 import application
-application.addHandler(r"/t/([1-9]+).html",ThingHandler)
+application.addHandler(r"/t/([0-9]+).html",ThingHandler)
 application.addHandler(r"/api/get_thing.json",ThingJSONHandler)
 application.addHandler(r"/new_post",PostToContainer)
 application.addHandler(r"/new_topic",NewTopic)
