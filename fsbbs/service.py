@@ -2,8 +2,10 @@
 module providing access to the bbs
 """
 from .data import datasource,model
+from fsbbs import adapter
 from twisted.internet import defer
 from notify import NotificationManager,Notification
+
 
 class BBSService(object):
     """
@@ -24,7 +26,8 @@ class BBSService(object):
         if self._basicInfo is None:
             mp = model.Forum(1,self.ds)
             yield mp.ready
-            self._basicInfo = {"forum": (yield mp.asDict(minimal=True))}
+            view = adapter.Forum(mp)
+            self._basicInfo = dict(forum=(yield view.as_processed_dict()))
 
         defer.returnValue(self._basicInfo)
 
