@@ -1,6 +1,7 @@
 from twisted.internet import defer
 from twisted.python import log
-import datasource
+from fsbbs.data import datasource
+from fsbbs.data.types import RHash
 
 class Thing(object):
     """ Base class for all stored objects in the datastore that are not part of the auth system"""
@@ -32,6 +33,9 @@ class Thing(object):
     def __repr__(self):
         return self.type
 
+    def _hash_key(self):
+        return self._hash_key_cache
+
     @property
     def tid(self):
         """ gets the id of this thing"""
@@ -42,6 +46,7 @@ class Thing(object):
         """ updates the cache when the tid is changed """
         self._tid = value
         self._key_cache = "thing:"+str(self._tid)+":"
+        self._hash_key_cache = "thing:"+str(self._tid)
     
     
 
@@ -72,6 +77,7 @@ class Thing(object):
     @defer.inlineCallbacks
     def loadThing(self,tid):
         self.tid = tid
+        self.hash = RHash(self._hash_key,self.datasource)
         # load it unless it hasn't been yet
         if not hasattr(self,"type"):
             self.type = yield self._get("type")
