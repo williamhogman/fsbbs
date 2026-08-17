@@ -1,15 +1,15 @@
 from twisted.internet import defer
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import LineReceiver
-from zope.interface import Interface,Attribute,implements
+from zope.interface import Interface, Attribute
 from socket import gethostname
 
 class DiagProtocol(LineReceiver):
     """ Implements the diagnostics line protocol"""
     def writeResponse(self,response):
         self.sendLine("Response")
-        if hasattr(response,"iteritems"):
-            for k,v in response.iteritems():
+        if hasattr(response,"items"):
+            for k,v in response.items():
                 self.sendLine("{}: {}".format(k,v))
         else:
             self.sendLine(str(response))

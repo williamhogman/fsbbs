@@ -1,7 +1,6 @@
 """
 modules for doing the username to uid
 """
-from zope.interface import implements
 from ..interface import IAuthModule
 from ...data import datasource
 from .helpers import addAuthModule
@@ -11,7 +10,6 @@ from twisted.internet import defer
 
 class BasicUsername:
     """module for finding a username in the redis backend"""
-    implements(IAuthModule)
 
 
     module_type = "authentication"
@@ -43,7 +41,6 @@ addAuthModule(BasicUsername)
 
 class RegisterUser:
     """register a user to the redis backend"""
-    implements(IAuthModule)
     
     module_type = "register"
 

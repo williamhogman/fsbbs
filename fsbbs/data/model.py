@@ -1,6 +1,6 @@
 from twisted.internet import defer
 from twisted.python import log
-import datasource
+from . import datasource
 import datetime
 import time
 
@@ -96,9 +96,10 @@ class Thing(object):
             self.type = pretype
         if self.datasource is None:
             self.datasource = datasource.getDatasource()
-            
+
+        tid = int(tid)
         # chain that defered onto our new one
-        if tid > 0:
+        if int(tid) > 0:
             self.ready = defer.Deferred()
             self.update = True # changes will cause and update
             self.loadThing(tid).chainDeferred(self.ready)
@@ -115,7 +116,7 @@ class Container(Thing):
         @defer.inlineCallbacks
         def onReady(a):
             self.contents = yield self.datasource.zrange(self._key("contents"))
-        if tid > 0:
+        if int(tid) > 0:
             self.ready.addCallback(onReady)
         
     @defer.inlineCallbacks
@@ -197,7 +198,7 @@ class Topic(Container):
             self.original_post,self.title = yield self._mget("original_post","title")
             #self.original_post = yield self._get("original_post")
             #self.title = yield self._get("title")
-        if tid>0:
+        if int(tid) > 0:
             self.ready.addCallback(onReady)
         
     @defer.inlineCallbacks
@@ -252,7 +253,7 @@ class Post(Thing):
             self.poster_name = yield usernameById(self.poster_uid,self.datasource)
             #yield self.datasource.get("user:{}:username".format(self.poster_uid))
 
-        if tid > 0:
+        if int(tid) > 0:
             self.ready.addCallback(onReady)
     
     @property
@@ -260,7 +261,7 @@ class Post(Thing):
         """Gets the pubdate as a pythondate"""
         if self.pubdate_stamp is None:
             return None
-        return datetime.datetime.utcfromtimestamp(self.pubdate_stamp)
+        return datetime.datetime.utcfromtimestamp(float(self.pubdate_stamp))
     @pubdate.setter
     def pubdate(self,value):
         self.pubdate_stamp = time.mktime(value.timetuple())
@@ -313,7 +314,7 @@ class Category(Container):
         @defer.inlineCallbacks
         def onReady(a):
             self.title,self.description = yield self._mget("title","description")
-        if tid>0:
+        if int(tid) > 0:
             self.ready.addCallback(onReady)
 
     @defer.inlineCallbacks
@@ -334,7 +335,7 @@ class Forum(Container):
         @defer.inlineCallbacks
         def onReady(a):
             self.name,self.tagline = yield self._mget("name","tagline")
-        if tid>0:
+        if int(tid) > 0:
             self.ready.addCallback(onReady)
     
     @defer.inlineCallbacks
@@ -397,7 +398,7 @@ def manyFromIds(tids,ds,ready=False,throw=False):
     types = yield ds.mget(*tidsToKey(tids))
  
 
-    for i in xrange(len(tids)):
+    for i in range(len(tids)):
         if types[i] is None:
             if throw:
                 raise ThingNotFoundError

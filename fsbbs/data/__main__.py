@@ -1,5 +1,5 @@
 from .diag import DiagFactory
-import datasource
+from . import datasource
 from twisted.internet import reactor
 from twisted.python import log
 log.msg("""running diag for the fsbbs.data

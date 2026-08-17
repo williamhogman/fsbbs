@@ -5,14 +5,12 @@ fsbbs.a3 diagnostics daemon
 from twisted.internet import defer
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import LineReceiver
-from zope.interface import implements
 from ..diag import DiagProtocol,IDiagFactory
 from twisted.python import log
 
         
 class DiagFactory(Factory):
     """ stores the shared state for diag daemon and creates DiagProtocol instance for each connection """
-    implements(IDiagFactory)
     servicename = "fsbbs.a3"
 
     protocol = DiagProtocol

@@ -1,3 +1,4 @@
+import os
 import txredisapi
 from twisted.internet import defer
 
@@ -7,7 +8,9 @@ class DataSourceFactory:
         self.load()
 
     def load(self):
-        self.api = txredisapi.lazyRedisConnectionPool("127.0.0.1",6379, pool_size=2)
+        port = int(os.environ.get("REDIS_PORT", "6379"))
+        host = os.environ.get("REDIS_HOST", "127.0.0.1")
+        self.api = txredisapi.lazyConnectionPool(host, port, poolsize=2)
 
     def getConnection(self):
         return DataSource((self.api))

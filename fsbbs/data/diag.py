@@ -3,11 +3,10 @@ provides a diagnostics daemon for the data module
 """
 
 from .model import Thing,ThingNotFoundError
-import datasource
+from . import datasource
 from twisted.internet import defer
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import LineReceiver
-from zope.interface import implements
 from twisted.python import log
 from ..diag import DiagProtocol,IDiagFactory
 
@@ -15,7 +14,6 @@ from ..diag import DiagProtocol,IDiagFactory
 
 class DiagFactory(Factory):
     """ stores the shared state for diag daemon and creates DiagProtocol instance for each connection """
-    implements(IDiagFactory)
     servicename = "fsbbs.data"
     protocol = DiagProtocol
 

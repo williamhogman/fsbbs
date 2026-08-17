@@ -1,15 +1,14 @@
-from zope.interface import implements
 from ..interface import IAuthModule
 from ...data import datasource
 from .helpers import addAuthModule
 from twisted.internet import defer
 from twisted.python import randbytes
+import binascii
 
 
 
 class SessionSecretModule:
     """Verifies session secrets stored in a redis backend"""
-    implements(IAuthModule)
 
     def __init__(self,ds=None):
         self.datasource = ds or datasource.getDatasource()
@@ -29,7 +28,7 @@ class SessionSecretModule:
             # session has been limited by ip
             if 'remote-addr' in chain:
                 sess_ip = yield self.datasource.get("session-ip:"+chain['session_secret'])                
-                if sess_ip != data['remote-addr']: 
+                if sess_ip != chain['remote-addr']: 
                     chain['attack-session-hijack'] = True                   
                     chain.failHard() # Session hijacking probably
                     return
@@ -41,7 +40,6 @@ addAuthModule(SessionSecretModule)
 
 class SessionStorageModule:
     """ Stores sesison secrets upon successful login, also providings rudimentary session-hijacking protections"""
-    implements(IAuthModule)
 
     module_type = "session"
 
@@ -62,7 +60,7 @@ class SessionStorageModule:
         # secure random source
         rand = randbytes.secureRandom(16)  
         
-        session_secret = rand.encode("hex") # should probably use something more efficent than hex here...
+        session_secret = binascii.hexlify(rand).decode("ascii") # should probably use something more efficent than hex here...
         
         chain['set_session_secret'] = session_secret
         yield self.datasource.set("session:"+session_secret,chain.uid)

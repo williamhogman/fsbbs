@@ -167,7 +167,7 @@ class LogoutJSONHandler(BaseHandler):
         #todo: invalidate the actual cookie
         self.finish(json_out.serialize({"success": True}))
         
-import application
+from . import application
 
 application.addHandler(r"/api/logout.json", LogoutJSONHandler)
 application.addHandler(r"/api/login.json", LoginJSONHandler)

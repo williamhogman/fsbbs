@@ -1,6 +1,6 @@
 """
 module for outputting html
 """
-import output
+from . import output
 
 OutputFormatter = output.OutputFormatter

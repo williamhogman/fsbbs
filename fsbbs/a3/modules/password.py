@@ -1,7 +1,6 @@
 """
 contains modules implementing password authentication
 """
-from zope.interface import implements
 from ..interface import IAuthModule
 from ...data import datasource
 from .helpers import addAuthModule
@@ -11,7 +10,6 @@ import hashlib
 
 class DummyPasswords():
     """ implements dummy passwords providing a simple backdoor for debugging"""
-    implements(IAuthModule)
 
     module_type = "authentication"
     """ 
@@ -34,7 +32,7 @@ class BasicPasswordMixin:
             return defer.succeed(self._salt)
         def cacheSalt(v):
             if v is None:
-                raise RuntimeError, "Salt can't be None"
+                raise RuntimeError("Salt can't be None")
             self._salt = v
             return v
         d =  self.datasource.get("authmod:BasicPasswords:salt").addCallback(cacheSalt)
@@ -46,7 +44,6 @@ class BasicPasswordMixin:
 
 class BasicPasswords(BasicPasswordMixin):
     """ Implements a logins with sha256 and salted passwords"""
-    implements(IAuthModule)
 
     module_type = "authentication"
     
@@ -65,16 +62,16 @@ class BasicPasswords(BasicPasswordMixin):
 
 
         pw = yield self.datasource.get("user:{}:basic_pass".format(chain.uid))
-        
+
         if pw is None:
             return
 
         salt = yield self.getSalt()
-        h = hashlib.sha256(salt)
-        h.update(chain['password'])
-        
-        
-        if h.digest() == pw:
+        h = hashlib.sha256(salt.encode("utf-8"))
+        h.update(chain['password'].encode("utf-8"))
+
+
+        if h.hexdigest() == pw:
             chain['valid_basicpassword'] = True
             chain._success = True
         
@@ -84,7 +81,6 @@ addAuthModule(BasicPasswords)
         
 class ChangeBasicPassword(BasicPasswordMixin):
     """ implements changing of a basic password"""
-    implements(IAuthModule)
     module_type="password"
     
     def __init__(self,ds=None):
@@ -97,10 +93,10 @@ class ChangeBasicPassword(BasicPasswordMixin):
         
         salt = yield self.getSalt()
 
-        h = hashlib.sha256(salt)
-        h.update(chain['new_password'])
-        
-        yield self.datasource.set(self.passwordKey(chain.uid),h.digest())
+        h = hashlib.sha256(salt.encode("utf-8"))
+        h.update(chain['new_password'].encode("utf-8"))
+
+        yield self.datasource.set(self.passwordKey(chain.uid),h.hexdigest())
         
 
 addAuthModule(ChangeBasicPassword)        
