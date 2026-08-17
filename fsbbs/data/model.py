@@ -96,7 +96,8 @@ class Thing(object):
             self.type = pretype
         if self.datasource is None:
             self.datasource = datasource.getDatasource()
-            
+
+        tid = int(tid)
         # chain that defered onto our new one
         if tid > 0:
             self.ready = defer.Deferred()
