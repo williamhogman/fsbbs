@@ -62,16 +62,16 @@ class BasicPasswords(BasicPasswordMixin):
 
 
         pw = yield self.datasource.get("user:{}:basic_pass".format(chain.uid))
-        
+
         if pw is None:
             return
 
         salt = yield self.getSalt()
-        h = hashlib.sha256(salt)
-        h.update(chain['password'])
-        
-        
-        if h.digest() == pw:
+        h = hashlib.sha256(salt.encode("utf-8"))
+        h.update(chain['password'].encode("utf-8"))
+
+
+        if h.hexdigest() == pw:
             chain['valid_basicpassword'] = True
             chain._success = True
         
@@ -93,10 +93,10 @@ class ChangeBasicPassword(BasicPasswordMixin):
         
         salt = yield self.getSalt()
 
-        h = hashlib.sha256(salt)
-        h.update(chain['new_password'])
-        
-        yield self.datasource.set(self.passwordKey(chain.uid),h.digest())
+        h = hashlib.sha256(salt.encode("utf-8"))
+        h.update(chain['new_password'].encode("utf-8"))
+
+        yield self.datasource.set(self.passwordKey(chain.uid),h.hexdigest())
         
 
 addAuthModule(ChangeBasicPassword)        

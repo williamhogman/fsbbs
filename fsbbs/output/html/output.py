@@ -5,7 +5,7 @@ import markdown
 
 def markdownFilter(text):
     """ jinja filter for rendering markdown, not async and very slow"""
-    return markdown.markdown(text,safe_mode=True)
+    return markdown.markdown(text or "")
 
 def dateFilter(dt):
     """ a human readable date"""

@@ -5,8 +5,8 @@ class User(object):
     def _key(self,name):
         return "user:{}:{}".format(self.uid,name)
     def __init__(self,uid,datasource):
-        if uid > 0:
-            self.uid = uid
+        if int(uid) > 0:
+            self.uid = int(uid)
             self.ready = self.load(datasource)
 
 
