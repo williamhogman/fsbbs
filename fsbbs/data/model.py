@@ -261,7 +261,7 @@ class Post(Thing):
         """Gets the pubdate as a pythondate"""
         if self.pubdate_stamp is None:
             return None
-        return datetime.datetime.utcfromtimestamp(self.pubdate_stamp)
+        return datetime.datetime.utcfromtimestamp(float(self.pubdate_stamp))
     @pubdate.setter
     def pubdate(self,value):
         self.pubdate_stamp = time.mktime(value.timetuple())
