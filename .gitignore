@@ -42,3 +42,6 @@ auto-save-list
 tramp
 .\#*
 
+
+!.lovable
+!.lovable/**
