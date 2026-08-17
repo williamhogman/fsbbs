@@ -99,7 +99,7 @@ class Thing(object):
 
         tid = int(tid)
         # chain that defered onto our new one
-        if tid > 0:
+        if int(tid) > 0:
             self.ready = defer.Deferred()
             self.update = True # changes will cause and update
             self.loadThing(tid).chainDeferred(self.ready)
@@ -116,7 +116,7 @@ class Container(Thing):
         @defer.inlineCallbacks
         def onReady(a):
             self.contents = yield self.datasource.zrange(self._key("contents"))
-        if tid > 0:
+        if int(tid) > 0:
             self.ready.addCallback(onReady)
         
     @defer.inlineCallbacks
@@ -198,7 +198,7 @@ class Topic(Container):
             self.original_post,self.title = yield self._mget("original_post","title")
             #self.original_post = yield self._get("original_post")
             #self.title = yield self._get("title")
-        if tid>0:
+        if int(tid) > 0:
             self.ready.addCallback(onReady)
         
     @defer.inlineCallbacks
@@ -253,7 +253,7 @@ class Post(Thing):
             self.poster_name = yield usernameById(self.poster_uid,self.datasource)
             #yield self.datasource.get("user:{}:username".format(self.poster_uid))
 
-        if tid > 0:
+        if int(tid) > 0:
             self.ready.addCallback(onReady)
     
     @property
@@ -314,7 +314,7 @@ class Category(Container):
         @defer.inlineCallbacks
         def onReady(a):
             self.title,self.description = yield self._mget("title","description")
-        if tid>0:
+        if int(tid) > 0:
             self.ready.addCallback(onReady)
 
     @defer.inlineCallbacks
@@ -335,7 +335,7 @@ class Forum(Container):
         @defer.inlineCallbacks
         def onReady(a):
             self.name,self.tagline = yield self._mget("name","tagline")
-        if tid>0:
+        if int(tid) > 0:
             self.ready.addCallback(onReady)
     
     @defer.inlineCallbacks
