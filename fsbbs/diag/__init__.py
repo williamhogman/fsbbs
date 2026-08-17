@@ -2,7 +2,7 @@
 Module implementing fsbbs diagnostics daemons
 """
 
-import protocol
+from . import protocol
 
 
 # we assigns the classes over here instead

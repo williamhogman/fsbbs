@@ -1,3 +1,3 @@
 """ The fseek.org bulletin board system"""
-import a3
-import data
+from . import a3
+from . import data

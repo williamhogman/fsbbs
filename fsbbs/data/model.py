@@ -1,6 +1,6 @@
 from twisted.internet import defer
 from twisted.python import log
-import datasource
+from . import datasource
 import datetime
 import time
 
@@ -397,7 +397,7 @@ def manyFromIds(tids,ds,ready=False,throw=False):
     types = yield ds.mget(*tidsToKey(tids))
  
 
-    for i in xrange(len(tids)):
+    for i in range(len(tids)):
         if types[i] is None:
             if throw:
                 raise ThingNotFoundError

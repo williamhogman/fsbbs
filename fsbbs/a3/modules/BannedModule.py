@@ -1,4 +1,3 @@
-from zope.interface import implements
 from ..interface import IAuthModule
 from ...data import datasource
 from .helpers import addAuthModule
@@ -29,7 +28,6 @@ class BannedModule:
            by which the authentication process should be delayed
 
     """
-    implements(IAuthModule)
     module_type = "authentication"
     
     def __init__(self,block_ip=[],block_user=["root","admin"]):

@@ -22,6 +22,6 @@ class IndexHandler(BaseHandler,SessionAuthMixin):
         
 
 
-import application
+from . import application
 
 application.addHandlers("index",{"html": IndexHandler, "json": SimpleJSON(service.getFrontpage), "msgpack": SimpleMsgpack(service.getFrontpage)})

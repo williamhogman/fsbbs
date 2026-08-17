@@ -1,4 +1,3 @@
-from zope.interface import implements
 from ..interface import IAuthModule
 from ...data import datasource
 from .helpers import addAuthModule
@@ -9,7 +8,6 @@ from twisted.python import randbytes
 
 class SessionSecretModule:
     """Verifies session secrets stored in a redis backend"""
-    implements(IAuthModule)
 
     def __init__(self,ds=None):
         self.datasource = ds or datasource.getDatasource()
@@ -41,7 +39,6 @@ addAuthModule(SessionSecretModule)
 
 class SessionStorageModule:
     """ Stores sesison secrets upon successful login, also providings rudimentary session-hijacking protections"""
-    implements(IAuthModule)
 
     module_type = "session"
 

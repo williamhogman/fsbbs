@@ -20,15 +20,15 @@ def addHandler(path,handler):
 
 def addHandlers(path,subhandlers):
     """ adds more than one handlers sharing an extensions such as index.html, index.json and so on """
-    for ext,handler in subhandlers.iteritems():
+    for ext,handler in subhandlers.items():
         addHandler("/{}.{}".format(path,ext), handler)
 
 
 
 
-import index
-import thing
-import auth
+from . import index
+from . import thing
+from . import auth
 
 
 
