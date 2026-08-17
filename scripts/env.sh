@@ -7,7 +7,7 @@ VENV="$ROOT/.venv"
 PY="$VENV/bin/python"
 PIP="$VENV/bin/pip"
 
-py_deps=(twisted jinja2 markdown msgpack six pyopenssl service_identity)
+py_deps=(twisted redis jinja2 markdown msgpack six pyopenssl service_identity)
 py_nodeps=(cyclone txredisapi)
 
 ensure_venv() {
