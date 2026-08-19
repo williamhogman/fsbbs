@@ -319,6 +319,9 @@ class Category(Container):
     a category system is a common feature on BBSes it allows for the grouping of content into a 
     basically this is a container with a name
     """
+    # topics inside a category are ranked by their vote score
+    contents_reverse = True
+
     def __init__(self,tid,*args,**kwargs):
         super(Category,self).__init__(tid,*args,**kwargs)
         @defer.inlineCallbacks
