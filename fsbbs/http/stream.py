@@ -4,7 +4,7 @@ Server sent events endpoint, streams realtime activity for a thing.
 The browser opens /api/events/<tid> and gets a `message` event for every new
 post, topic or vote inside that thing.
 """
-from twisted.internet import defer
+import cyclone.web
 from twisted.python import log
 
 from .handler import BaseHandler
@@ -15,6 +15,7 @@ class EventStreamHandler(BaseHandler):
     """ streams events for a single thing as text/event-stream """
 
     # SSE responses are open ended, cyclone must not try to buffer or gzip them
+    @cyclone.web.asynchronous
     def get(self, tid):
         self.set_header("Content-Type", "text/event-stream")
         self.set_header("Cache-Control", "no-cache")
@@ -37,15 +38,13 @@ class EventStreamHandler(BaseHandler):
         stop = pubsub.hub.listen(tid, onEvent)
         log.msg("event stream opened for thing {}".format(tid))
 
-        d = self.notifyFinish()
-
         def closed(_):
             stop()
             log.msg("event stream closed for thing {}".format(tid))
 
-        d.addBoth(closed)
-        # never call finish, the client closes the stream
-        return d
+        # the request stays open until the client goes away, cyclone must not
+        # finish it for us (hence @asynchronous and no returned deferred)
+        self.notifyFinish().addBoth(closed)
 
 
 from . import application
