@@ -103,6 +103,40 @@ for _ in $(seq 1 20); do
 done
 check "aof persistence enabled" "appendonly yes" "$("$(redis_cli)" -p "$REDIS_PORT" config get appendonly | tr '\n' ' ' | tr -d '\r' | sed 's/ $//')"
 
+# --- voting -----------------------------------------------------------------
+topicb="$(curl -s -b "$jar2" -o /dev/null -w '%{http_code}' -d "tid=2" -d "title=vote target" -d "text=vote me" "$base/new_topic" >/dev/null; "$(redis_cli)" -p "$REDIS_PORT" get thing:next_tid)"
+check "anonymous vote rejected" 401 "$(status -d "tid=$topicb" -d "delta=1" "$base/vote")"
+contains "vote counted" '"score": 1' "$(curl -s -b "$jar2" -d "tid=$topicb" -d "delta=1" "$base/api/vote.json")"
+contains "second vote refused" '"already_voted"' "$(curl -s -b "$jar2" -d "tid=$topicb" -d "delta=1" "$base/api/vote.json")"
+check "vote rescored inside parent" "1" "$("$(redis_cli)" -p "$REDIS_PORT" zscore thing:2:contents "$topicb" | cut -d. -f1)"
+check "highest scored topic listed first" "$topicb" "$(curl -s "$base/t/2.html" | grep -o 'class="votes" data-id="[0-9]*"' | head -1 | grep -o '[0-9]*')"
+contains "topic page shows score" 'class="score"' "$(curl -s "$base/t/$topicb.html")"
+
+# --- realtime (server sent events) -----------------------------------------
+sse="$(mktemp)"
+curl -sN --max-time 6 "$base/api/events/2" > "$sse" &
+ssepid=$!
+sleep 1
+curl -s -b "$jar2" -o /dev/null -d "tid=2" -d "title=live topic" -d "text=live" "$base/new_topic"
+livetid="$("$(redis_cli)" -p "$REDIS_PORT" get thing:next_tid)"
+curl -s -b "$jar2" -o /dev/null -d "tid=$livetid" -d "delta=1" "$base/api/vote.json"
+sleep 2
+kill "$ssepid" 2>/dev/null || true
+wait "$ssepid" 2>/dev/null || true
+contains "event stream sends retry hint" "retry:" "$(cat "$sse")"
+contains "event stream pushes new topic" '"event": "topic"' "$(cat "$sse")"
+contains "event stream pushes votes" '"event": "vote"' "$(cat "$sse")"
+check "event stream content type" "text/event-stream" "$(curl -sN --max-time 2 -D - -o /dev/null "$base/api/events/2" | tr -d '\r' | awk -F': ' '/^Content-Type/{print $2}')"
+rm -f "$sse"
+
+# --- themes -----------------------------------------------------------------
+check "theme switch sets cookie" 302 "$(status "$base/theme/dark")"
+check "unknown theme rejected" 404 "$(status "$base/theme/nope")"
+contains "dark theme loads its override sheet" '/st/style.css' "$(curl -s -b "theme=dark" "$base/index.html")"
+contains "default theme has no override sheet" '<html data-theme="default"' "$(curl -s "$base/index.html")"
+check "theme assets served" 200 "$(status -b "theme=dark" "$base/st/style.css")"
+contains "theme switcher rendered" 'href="/theme/dark"' "$(curl -s "$base/index.html")"
+
 # --- api --------------------------------------------------------------------
 contains "index json exposes forum" '"name"' "$(curl -s "$base/index.json")"
 contains "thing json works" '"title"' "$(curl -s "$base/api/get_thing.json?id=$topic")"
