@@ -111,11 +111,18 @@ class Thing(object):
 
 class Container(Thing):
     """ A thing containing a sorted set of other things"""
+
+    # when true the contents are read highest-score-first (used for voting)
+    contents_reverse = False
+
     def __init__(self,tid,*args,**kwargs):
         super(Container,self).__init__(tid,*args,**kwargs)
         @defer.inlineCallbacks
         def onReady(a):
-            self.contents = yield self.datasource.zrange(self._key("contents"))
+            if self.contents_reverse:
+                self.contents = yield self.datasource.zrevrange(self._key("contents"))
+            else:
+                self.contents = yield self.datasource.zrange(self._key("contents"))
         if int(tid) > 0:
             self.ready.addCallback(onReady)
         
@@ -129,6 +136,9 @@ class Container(Thing):
         """ adds a pointer to the passed in thing this operation does not wait for save"""
         self.contents.append(thing)
         yield self.datasource.zadd(self._key("contents"),score,tid)
+        # remember where the thing lives so votes can rescore it in place
+        yield self.datasource.set("thing:{}:parent".format(tid),self.tid)
+
 
     def get_contents(self):
         """gets the contents of the container"""
