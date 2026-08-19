@@ -876,3 +876,59 @@ label {
 {
    float: none;
 }
+/*
+ * Voting, theme switcher and realtime bar
+ */
+
+.votes {
+   float: left;
+   width: 3em;
+   margin: 0 0.75em 0 0;
+   text-align: center;
+   line-height: 1.2;
+}
+
+.votes form {
+   margin: 0;
+}
+
+.votes button {
+   border: 0;
+   background: none;
+   cursor: pointer;
+   font-size: 0.9em;
+   color: #888;
+   padding: 0;
+}
+
+.votes button:hover {
+   color: #333;
+}
+
+.votes .score {
+   display: block;
+   font-weight: bold;
+}
+
+.votes .score-updated {
+   color: #2a7;
+}
+
+.themebar {
+   clear: both;
+   text-align: right;
+   font-size: 0.8em;
+   color: #777;
+}
+
+.realtime-bar {
+   position: fixed;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   padding: 0.6em;
+   text-align: center;
+   background: #ffd;
+   border-top: solid 1px #ccb;
+   cursor: pointer;
+}

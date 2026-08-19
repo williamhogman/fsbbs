@@ -26,12 +26,14 @@ r.set("thing:2:type", "category")
 r.set("thing:2:title", "General")
 r.set("thing:2:description", "Discuss *anything* here")
 r.zadd("thing:1:contents", {"2": 0})
+r.set("thing:2:parent", "1")
 
 # a topic with an original post inside the category
 r.set("thing:3:type", "topic")
 r.set("thing:3:title", "Welcome to fsbbs")
 r.set("thing:3:original_post", "4")
 r.zadd("thing:2:contents", {"3": 0})
+r.set("thing:3:parent", "2")
 
 r.set("thing:4:type", "post")
 r.set("thing:4:poster_uid", "1")

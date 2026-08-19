@@ -111,11 +111,18 @@ class Thing(object):
 
 class Container(Thing):
     """ A thing containing a sorted set of other things"""
+
+    # when true the contents are read highest-score-first (used for voting)
+    contents_reverse = False
+
     def __init__(self,tid,*args,**kwargs):
         super(Container,self).__init__(tid,*args,**kwargs)
         @defer.inlineCallbacks
         def onReady(a):
-            self.contents = yield self.datasource.zrange(self._key("contents"))
+            if self.contents_reverse:
+                self.contents = yield self.datasource.zrevrange(self._key("contents"))
+            else:
+                self.contents = yield self.datasource.zrange(self._key("contents"))
         if int(tid) > 0:
             self.ready.addCallback(onReady)
         
@@ -129,6 +136,9 @@ class Container(Thing):
         """ adds a pointer to the passed in thing this operation does not wait for save"""
         self.contents.append(thing)
         yield self.datasource.zadd(self._key("contents"),score,tid)
+        # remember where the thing lives so votes can rescore it in place
+        yield self.datasource.set("thing:{}:parent".format(tid),self.tid)
+
 
     def get_contents(self):
         """gets the contents of the container"""
@@ -195,16 +205,16 @@ class Topic(Container):
         @defer.inlineCallbacks
         def onReady(a):
             # the original post that started the topic
-            self.original_post,self.title = yield self._mget("original_post","title")
-            #self.original_post = yield self._get("original_post")
-            #self.title = yield self._get("title")
+            self.original_post,self.title,score = yield self._mget("original_post","title","score")
+            self.score = int(score or 0)
         if int(tid) > 0:
             self.ready.addCallback(onReady)
         
     @defer.inlineCallbacks
     def asDict(self,bs=None,**kwargs):
         """gets the topic as a dict"""
-        d = {"title": self.title}
+        d = {"title": self.title, "score": getattr(self,"score",0)}
+
         try:
             op = yield anythingFromId(self.original_post,self.datasource,ready=True)
             op_dict= yield op.asDict()
@@ -309,6 +319,9 @@ class Category(Container):
     a category system is a common feature on BBSes it allows for the grouping of content into a 
     basically this is a container with a name
     """
+    # topics inside a category are ranked by their vote score
+    contents_reverse = True
+
     def __init__(self,tid,*args,**kwargs):
         super(Category,self).__init__(tid,*args,**kwargs)
         @defer.inlineCallbacks

@@ -1,0 +1,18 @@
+{# vote widget, expects `item` (a topic dict) in the context #}
+<div class="votes" data-id="{{item.id}}">
+  {% if user %}
+  <form action="/vote" method="post" class="vote vote-up">
+    <input type="hidden" name="tid" value="{{item.id}}" />
+    <input type="hidden" name="delta" value="1" />
+    <button type="submit" title="Vote up">&#9650;</button>
+  </form>
+  {% endif %}
+  <span class="score" data-id="{{item.id}}">{{item.score or 0}}</span>
+  {% if user %}
+  <form action="/vote" method="post" class="vote vote-down">
+    <input type="hidden" name="tid" value="{{item.id}}" />
+    <input type="hidden" name="delta" value="-1" />
+    <button type="submit" title="Vote down">&#9660;</button>
+  </form>
+  {% endif %}
+</div>

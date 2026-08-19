@@ -1,0 +1,88 @@
+/*
+ * "dark" theme, an override layer on top of the default theme.
+ * Only the bits that change are shipped, templates fall back to themes/default.
+ */
+body {
+    background: #16181c;
+    color: #d5d8dd;
+}
+
+a, a:visited {
+    color: #7fb2ff;
+}
+
+h1 a, h2 a, h3 a {
+    color: #e8ebef;
+}
+
+article, .listing li {
+    border-color: #2b2f36;
+}
+
+.votes button {
+    color: #7c828c;
+}
+
+.votes button:hover {
+    color: #e8ebef;
+}
+
+.modalWindow {
+    background: #22252b;
+    border-color: #3a3f47;
+    background-image: none;
+}
+
+.error {
+    background: #4a2422;
+}
+
+.realtime-bar {
+    background: #2b2f36;
+    border-top-color: #3a3f47;
+    color: #e8ebef;
+}
+
+.themebar, small {
+    color: #8b919b;
+}
+
+input, textarea {
+    background: #22252b;
+    color: #e8ebef;
+    border: solid 1px #3a3f47;
+}
+
+/* the default theme paints the page furniture white */
+#container, #msthead, #mstfoot {
+    background: #1d2026;
+    border-color: #2b2f36;
+}
+
+.thing-topic article, .thing-topic .op,
+.thing-topic article header, .thing-topic header p,
+.thing-category article, #container, #msthead, #mstfoot {
+    border-color: #2b2f36;
+}
+
+.thing-category article h3 a, .thing-category article h3 {
+    color: #e8ebef;
+}
+
+.wmd-preview {
+    background-color: #22303c;
+}
+
+.wmd-button-bar, .wmd-spacer {
+    background-color: #3a3f47;
+}
+
+h1, h2, h3, h4, h5, h6,
+#msthead hgroup a, #msthead h1, #msthead h2,
+a[rel=self], .thing header h2, .thing-category article h3 {
+    color: #e8ebef;
+}
+
+.thing-category article h3 a {
+    color: #7fb2ff;
+}

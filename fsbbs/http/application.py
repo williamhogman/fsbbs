@@ -29,6 +29,11 @@ def addHandlers(path,subhandlers):
 from . import index
 from . import thing
 from . import auth
+from . import vote
+from . import stream
+from . import theme
+
+
 
 
 
@@ -42,5 +47,7 @@ class Application(cyclone.web.Application):
         settings = dict(
         )
         handlers.append((r"/s/(.*)",cyclone.web.StaticFileHandler,{"path": "themes/default/static/"}))
+        # assets of the currently selected theme
+        handlers.append((r"/st/(.*)",theme.ThemeStaticHandler,{"path": "themes/default/static/"}))
         handlers.append((r"/j/(.*)",cyclone.web.StaticFileHandler,{"path": "javascript/" }))
         cyclone.web.Application.__init__(self, handlers, **settings)

@@ -13,3 +13,11 @@ You're not logged in.<a class="button register-btn" href="/login.html">Login</a>
 {% endif %}
 </div>
 
+{% if themes and themes | length > 1 %}
+<div class="themebar">
+  Theme:
+  {% for t in themes %}
+  {% if t == theme %}<strong>{{t}}</strong>{% else %}<a href="/theme/{{t}}">{{t}}</a>{% endif %}
+  {% endfor %}
+</div>
+{% endif %}

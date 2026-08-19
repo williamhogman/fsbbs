@@ -8,6 +8,7 @@
   <a href="/t/{{thing.id}}.html" rel="self"><h2>{{thing.name or thing.title | e}}</h2></a>
   {% if thing.type == "topic" %}
   {% set op = thing.original_post %}
+  {% with item = thing %}{% include 'vote.html' %}{% endwith %}
   <p>Topic created by <a rel="author" itemprop="creator" data-id="{{op.poster_uid}}" href="/u/{{op.poster_uid}}.html">{{op.poster_name | e}}</a>
   {% if op.pubdate %}
   <time pubdate itemprop="dateCreated" datetime="{{op.pubdate.isoformat()}}Z">{{op.pubdate | nicedate}}</time>.
