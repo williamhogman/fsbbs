@@ -6,6 +6,7 @@ from twisted.internet import defer
 from ..service import service
 from ..output import json_out, html
 from ..a3 import AuthService
+from ..data import datasource
 
 class LoginHandler(BaseHandler, SessionAuthMixin):
     """provides a login form"""
@@ -29,7 +30,8 @@ class LoginHandler(BaseHandler, SessionAuthMixin):
         password = self.get_argument("password")
         auth = AuthService()
         res = yield auth.getChain("default").run({"username": username,
-                                                  "password": password})
+                                                  "password": password,
+                                                  "ipaddr": self.request.remote_ip})
 
         if res.success:
             # if we've been asked to store a secret
@@ -68,7 +70,8 @@ class RegisterHandler(BaseHandler, SessionAuthMixin):
         password = self.get_argument("password")
         auth = AuthService()  
         res = yield auth.getChain("register").run({"username":username,
-                                                   "new_password": password})
+                                                   "new_password": password,
+                                                   "ipaddr": self.request.remote_ip})
         if res.success:
             if 'set_session_secret' in res:
                 self.set_cookie("s", res['set_session_secret'])
@@ -84,10 +87,14 @@ class RegisterHandler(BaseHandler, SessionAuthMixin):
 
 
 class LogoutHandler(BaseHandler):
-    """ provides a handler for logging out and redirects the user"""
+    """ provides a handler for logging out, invalidates the session server-side and redirects the user"""
+    @defer.inlineCallbacks
     def get(self):
+        secret = self.get_cookie("s")
+        if secret is not None:
+            yield datasource.getDatasource().delete("session:"+secret,
+                                                    "session-ip:"+secret)
         self.clear_cookie("s")
-        #todo: invalidate the login cookie
         self.redirect("/index.html")
 
 from ..output import json_out
@@ -109,7 +116,8 @@ class RegisterJSONHandler(BaseHandler, SessionAuthMixin):
         
         auth = AuthService()
         res = yield auth.getChain("register").run({"username": username,
-                                                   "new_password": password})
+                                                   "new_password": password,
+                                                   "ipaddr": self.request.remote_ip})
 
         self.set_header("Content-Type","application/json")
         if res.success:
@@ -140,7 +148,8 @@ class LoginJSONHandler(BaseHandler, SessionAuthMixin):
         password = self.get_argument("password")
         auth = AuthService()
         res = yield auth.getChain("default").run({"username": username,
-                                                  "password": password})
+                                                  "password": password,
+                                                  "ipaddr": self.request.remote_ip})
 
         self.set_header("Content-Type", "application/json")
         if res.success:
@@ -161,10 +170,14 @@ class LogoutJSONHandler(BaseHandler):
     """
     provides a logout method callable via JSON+XHR
     """
+    @defer.inlineCallbacks
     def post(self):
+        secret = self.get_cookie("s")
+        if secret is not None:
+            yield datasource.getDatasource().delete("session:"+secret,
+                                                    "session-ip:"+secret)
         self.clear_cookie("s")
         self.set_header("Content-Type","application/json")
-        #todo: invalidate the actual cookie
         self.finish(json_out.serialize({"success": True}))
         
 from . import application
