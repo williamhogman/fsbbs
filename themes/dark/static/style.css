@@ -52,3 +52,27 @@ input, textarea {
     color: #e8ebef;
     border: solid 1px #3a3f47;
 }
+
+/* the default theme paints the page furniture white */
+#container, #msthead, #mstfoot {
+    background: #1d2026;
+    border-color: #2b2f36;
+}
+
+.thing-topic article, .thing-topic .op,
+.thing-topic article header, .thing-topic header p,
+.thing-category article, #container, #msthead, #mstfoot {
+    border-color: #2b2f36;
+}
+
+.thing-category article h3 a, .thing-category article h3 {
+    color: #e8ebef;
+}
+
+.wmd-preview {
+    background-color: #22303c;
+}
+
+.wmd-button-bar, .wmd-spacer {
+    background-color: #3a3f47;
+}

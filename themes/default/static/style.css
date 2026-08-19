@@ -915,8 +915,8 @@ label {
 }
 
 .themebar {
-   float: right;
-   clear: right;
+   clear: both;
+   text-align: right;
    font-size: 0.8em;
    color: #777;
 }
