@@ -1,8 +1,12 @@
 """
 module providing access to the bbs
 """
+import json
+
 from .data import datasource,model
 from twisted.internet import defer
+from twisted.python import log
+
 
 class BBSService(object):
     """
