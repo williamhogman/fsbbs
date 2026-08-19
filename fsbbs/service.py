@@ -51,8 +51,11 @@ class BBSService(object):
         try:
             thing = yield model.anythingFromId(tid,self.ds,ready=True)
         except model.ThingNotFoundError:
+            # honour throw: returnValue raises, so the re-raise has to come first
+            if throw:
+                raise
             defer.returnValue({"msg": self._msg("Could not find the requested thing","error")})
-            raise
+
         else:
             defer.returnValue({"thing": (yield thing.asDict(contentsParsed=True))})
             
