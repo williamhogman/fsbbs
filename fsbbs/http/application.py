@@ -29,6 +29,9 @@ def addHandlers(path,subhandlers):
 from . import index
 from . import thing
 from . import auth
+from . import vote
+from . import stream
+
 
 
 
