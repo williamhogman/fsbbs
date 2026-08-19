@@ -67,7 +67,7 @@ check "session bound to client ip" "127.0.0.1" "$boundip"
 # --- create a topic and post ------------------------------------------------
 check "new topic accepted" 302 "$(status -b "$jar" -d "tid=2" -d "title=smoke topic" -d "text=hello *world*" "$base/new_topic")"
 newtid="$("$(redis_cli)" -p "$REDIS_PORT" get thing:next_tid)"
-topic=$((newtid-1))
+topic="$newtid"
 check "created topic renders" 200 "$(status "$base/t/$topic.html")"
 contains "topic shows its title" "smoke topic" "$(curl -s "$base/t/$topic.html")"
 contains "category lists new topic" "smoke topic" "$(curl -s "$base/t/2.html")"
