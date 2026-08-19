@@ -59,6 +59,12 @@ class BBSService(object):
         else:
             defer.returnValue({"thing": (yield thing.asDict(contentsParsed=True))})
             
+    def _publish(self,tid,event):
+        """ fires a realtime event on the channel of a thing, failures are non fatal """
+        d = self.ds.publish("fsbbs:thing:{}".format(tid),json.dumps(event))
+        d.addErrback(lambda f: log.msg("could not publish event: {}".format(f.value)))
+        return d
+
     @defer.inlineCallbacks
     def postToThing(self,tid,text,user):
         """
@@ -71,6 +77,8 @@ class BBSService(object):
 
         yield post.save()
         yield cont.add(post.tid)
+        self._publish(tid,{"event": "post", "tid": post.tid, "parent": int(tid)})
+        defer.returnValue(post.tid)
 
     @defer.inlineCallbacks
     def newTopic(self,tid,title,text,user=None):
@@ -85,10 +93,40 @@ class BBSService(object):
         post = model.Post.new(text,user.uid,ds=self.ds)
         yield post.save()
 
-        topic = model.Topic.new(title,post)
+        topic = model.Topic.new(title,post,ds=self.ds)
         yield topic.save()
         
         yield cont.add(topic.tid)
+        self._publish(tid,{"event": "topic", "tid": topic.tid, "parent": int(tid),
+                           "title": title})
+        defer.returnValue(topic.tid)
+
+    @defer.inlineCallbacks
+    def vote(self,tid,uid,delta):
+        """
+        Casts a single vote on a thing. Votes are one per user and they rescore
+        the thing inside its parent container, which is what orders listings.
+        """
+        delta = 1 if int(delta) >= 0 else -1
+        tid = int(tid)
+
+        # raises ThingNotFoundError for made up ids
+        yield model.anythingFromId(tid,self.ds,ready=True)
+
+        first = yield self.ds.setnx("vote:{}:{}".format(tid,uid),delta)
+        if not first:
+            score = yield self.ds.get("thing:{}:score".format(tid))
+            defer.returnValue({"status": "already_voted", "score": int(score or 0)})
+
+        score = yield self.ds.incr("thing:{}:score".format(tid),delta)
+        parent = yield self.ds.get("thing:{}:parent".format(tid))
+        if parent is not None:
+            yield self.ds.zincrby("thing:{}:contents".format(parent),delta,tid)
+            self._publish(parent,{"event": "vote", "tid": tid, "parent": int(parent),
+                                  "score": int(score)})
+
+        defer.returnValue({"status": "success", "score": int(score), "tid": tid})
+
 
 
         
