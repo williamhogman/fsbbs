@@ -34,10 +34,22 @@ class DataSource:
 
     def zrange(self,key,start=0,stop=-1):
         return self.api.zrange(key,start,stop)
-    
+
+    def zrevrange(self,key,start=0,stop=-1):
+        return self.api.zrevrange(key,start,stop)
+
     def zadd(self,key,score,value):
         return self.api.zadd(key,score,value)
-    
+
+    def zincrby(self,key,increment,value):
+        return self.api.zincrby(key,increment,value)
+
+    def setnx(self,key,value):
+        return self.api.setnx(key,value)
+
+    def publish(self,channel,message):
+        return self.api.publish(channel,message)
+
     def mget(self,*args):
         return self.api.mget(*args)
 
@@ -46,6 +58,7 @@ class DataSource:
 
     def expire(self,key,ttl):
         return self.api.expire(key,ttl)
+
 
 # dsf is our singleton datasource factory
 # TODO: provid confiurablity
