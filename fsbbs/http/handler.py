@@ -121,7 +121,8 @@ class SessionAuthMixin(object):
         if session_cookie is None:
             self.logged_in = False
             defer.returnValue(False)
-        res = yield authserv.getChain("session").run({"session_secret": session_cookie})
+        res = yield authserv.getChain("session").run({"session_secret": session_cookie,
+                                                      "ipaddr": self.request.remote_ip})
 
         self.logged_in = res.success
 

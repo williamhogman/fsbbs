@@ -41,6 +41,12 @@ class DataSource:
     def mget(self,*args):
         return self.api.mget(*args)
 
+    def delete(self,*keys):
+        return self.api.delete(*keys)
+
+    def expire(self,key,ttl):
+        return self.api.expire(key,ttl)
+
 # dsf is our singleton datasource factory
 # TODO: provid confiurablity
 dsf = DataSourceFactory()

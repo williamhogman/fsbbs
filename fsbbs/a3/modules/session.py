@@ -5,6 +5,8 @@ from twisted.internet import defer
 from twisted.python import randbytes
 import binascii
 
+# sessions expire after a week of inactivity, verification refreshes the ttl
+SESSION_TTL = 7 * 24 * 3600
 
 
 class SessionSecretModule:
@@ -25,14 +27,18 @@ class SessionSecretModule:
             chain.uid = uid
 
 
-            # session has been limited by ip
-            if 'remote-addr' in chain:
-                sess_ip = yield self.datasource.get("session-ip:"+chain['session_secret'])                
-                if sess_ip != chain['remote-addr']: 
-                    chain['attack-session-hijack'] = True                   
+            # if the session was bound to an ip when it was created, enforce it
+            sess_ip = yield self.datasource.get("session-ip:"+chain['session_secret'])
+            if sess_ip is not None and 'ipaddr' in chain:
+                if sess_ip != chain['ipaddr']:
+                    chain['attack-session-hijack'] = True
                     chain.failHard() # Session hijacking probably
                     return
-            
+
+            # sliding expiry: keep the session alive while it is being used
+            yield self.datasource.expire("session:"+chain['session_secret'],SESSION_TTL)
+            yield self.datasource.expire("session-ip:"+chain['session_secret'],SESSION_TTL)
+
             chain._success = True
 
 
@@ -64,12 +70,14 @@ class SessionStorageModule:
         
         chain['set_session_secret'] = session_secret
         yield self.datasource.set("session:"+session_secret,chain.uid)
+        yield self.datasource.expire("session:"+session_secret,SESSION_TTL)
 
 
-        # if an IP address has been specified in the chain
-        # set it in the data store
+        # bind the session to the ip address it was created from
+        # so SessionSecretModule can detect hijacking attempts
 
         if "ipaddr" in chain:
-            self.datasource.set("session-ip:"+session_secret,chain['ipaddr'])
+            yield self.datasource.set("session-ip:"+session_secret,chain['ipaddr'])
+            yield self.datasource.expire("session-ip:"+session_secret,SESSION_TTL)
 
 addAuthModule(SessionStorageModule)
