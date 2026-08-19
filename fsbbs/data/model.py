@@ -205,16 +205,16 @@ class Topic(Container):
         @defer.inlineCallbacks
         def onReady(a):
             # the original post that started the topic
-            self.original_post,self.title = yield self._mget("original_post","title")
-            #self.original_post = yield self._get("original_post")
-            #self.title = yield self._get("title")
+            self.original_post,self.title,score = yield self._mget("original_post","title","score")
+            self.score = int(score or 0)
         if int(tid) > 0:
             self.ready.addCallback(onReady)
         
     @defer.inlineCallbacks
     def asDict(self,bs=None,**kwargs):
         """gets the topic as a dict"""
-        d = {"title": self.title}
+        d = {"title": self.title, "score": getattr(self,"score",0)}
+
         try:
             op = yield anythingFromId(self.original_post,self.datasource,ready=True)
             op_dict= yield op.asDict()
