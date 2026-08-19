@@ -1,0 +1,54 @@
+/*
+ * "dark" theme, an override layer on top of the default theme.
+ * Only the bits that change are shipped, templates fall back to themes/default.
+ */
+body {
+    background: #16181c;
+    color: #d5d8dd;
+}
+
+a, a:visited {
+    color: #7fb2ff;
+}
+
+h1 a, h2 a, h3 a {
+    color: #e8ebef;
+}
+
+article, .listing li {
+    border-color: #2b2f36;
+}
+
+.votes button {
+    color: #7c828c;
+}
+
+.votes button:hover {
+    color: #e8ebef;
+}
+
+.modalWindow {
+    background: #22252b;
+    border-color: #3a3f47;
+    background-image: none;
+}
+
+.error {
+    background: #4a2422;
+}
+
+.realtime-bar {
+    background: #2b2f36;
+    border-top-color: #3a3f47;
+    color: #e8ebef;
+}
+
+.themebar, small {
+    color: #8b919b;
+}
+
+input, textarea {
+    background: #22252b;
+    color: #e8ebef;
+    border: solid 1px #3a3f47;
+}
