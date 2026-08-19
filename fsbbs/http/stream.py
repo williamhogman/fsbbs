@@ -18,7 +18,11 @@ class EventStreamHandler(BaseHandler):
     def get(self, tid):
         self.set_header("Content-Type", "text/event-stream")
         self.set_header("Cache-Control", "no-cache")
-        self.set_header("Connection", "keep-alive")
+        self.set_header("Connection", "close")
+        # this cyclone build's chunked transfer transform is py2 only (it builds
+        # str frames around bytes), so the stream is written raw and the
+        # connection is closed by the client instead
+        self._transforms = []
         # tell the client to retry after 3s if the stream drops
         # this cyclone build concatenates raw header bytes with the body, so
         # every chunk of an SSE stream has to be bytes
