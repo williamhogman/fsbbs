@@ -31,6 +31,8 @@ from . import thing
 from . import auth
 from . import vote
 from . import stream
+from . import theme
+
 
 
 
