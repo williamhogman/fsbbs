@@ -2,6 +2,8 @@
 theme selection: a cookie picks the active theme, static assets of the active
 theme are served from /st/
 """
+import os
+
 import cyclone.web
 
 from .handler import BaseHandler
@@ -26,7 +28,9 @@ class ThemeStaticHandler(cyclone.web.StaticFileHandler):
     """ serves the static files of the theme the visitor selected """
     def get(self, path, include_body=True):
         # the theme cookie decides which directory the asset comes from
-        self.root = "themes/{}/static/".format(output.OutputFormatter.themeFor(self))
+        # cyclone compares the resolved file against an absolute root
+        self.root = os.path.abspath(
+            "themes/{}/static".format(output.OutputFormatter.themeFor(self))) + os.sep
         return cyclone.web.StaticFileHandler.get(self, path, include_body)
 
 

@@ -20,11 +20,14 @@ class EventStreamHandler(BaseHandler):
         self.set_header("Cache-Control", "no-cache")
         self.set_header("Connection", "keep-alive")
         # tell the client to retry after 3s if the stream drops
-        self.write("retry: 3000\n\n")
+        # this cyclone build concatenates raw header bytes with the body, so
+        # every chunk of an SSE stream has to be bytes
+        self.write(b"retry: 3000\n\n")
         self.flush()
 
         def onEvent(message):
-            self.write("data: {}\n\n".format(message.replace("\n", " ")))
+            payload = "data: {}\n\n".format(message.replace("\n", " "))
+            self.write(payload.encode("utf-8"))
             self.flush()
 
         stop = pubsub.hub.listen(tid, onEvent)
