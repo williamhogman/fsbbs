@@ -1,0 +1,7 @@
+apiVersion: exec.lovable.dev/v1
+kind: LifecycleScript
+metadata:
+  name: 99-test
+spec:
+  purpose: test
+  command: "bash scripts/smoke.sh"
