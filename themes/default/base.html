@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="{{theme or 'default'}}">
   <head>
     {# Lets beat some sense into IE #}
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
@@ -8,6 +8,10 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/script.js/1.3/script.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link href="/s/style.css" rel="stylesheet" />
+    {% if theme and theme != "default" %}
+    {# themes only ship what they override #}
+    <link href="/st/style.css" rel="stylesheet" />
+    {% endif %}
   </head>
   <body>
     {% block body %}
@@ -16,7 +20,13 @@
       {% if user %}
       window.initial_uid = {{user.uid}};
       {% endif %}
+      {% if thing is defined %}
+      window.stream_tid = {{thing.id}};
+      {% elif main is defined %}
+      window.stream_tid = {{main.id}};
+      {% endif %}
       $script("/j/app.js","app");
+      $script("/j/realtime.js","realtime");
 
     </script>
     {# chrome frame installer #}
