@@ -11,6 +11,7 @@ cd "$ROOT"
 ensure_venv
 
 export REDIS_PORT="${BUILD_REDIS_PORT:-6399}"
+export REDIS_EPHEMERAL=1
 PORT="${BUILD_PORT:-8099}"
 export PORT
 
