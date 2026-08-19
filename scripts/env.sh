@@ -46,10 +46,19 @@ ensure_redis() {
     if "$(redis_cli)" -p "$port" ping >/dev/null 2>&1; then
         return
     fi
-    mkdir -p "$ROOT/.venv/redis"
+    # one data dir per port so throwaway instances (build/smoke) never touch
+    # the durable dev dataset
+    local dir="$ROOT/.venv/redis-$port"
+    # REDIS_EPHEMERAL=1 disables persistence entirely (build/smoke runs)
+    local persist=(--appendonly yes --appendfsync everysec --save '900 1')
+    if [ "${REDIS_EPHEMERAL:-0}" = "1" ]; then
+        rm -rf "$dir"
+        persist=(--appendonly no --save '')
+    fi
+    mkdir -p "$dir"
     "$(redis_bin)" --port "$port" --daemonize yes \
-        --dir "$ROOT/.venv/redis" --save '' --appendonly no \
-        --logfile "$ROOT/.venv/redis/redis.log"
+        --dir "$dir" "${persist[@]}" \
+        --logfile "$dir/redis.log"
     for _ in $(seq 1 30); do
         "$(redis_cli)" -p "$port" ping >/dev/null 2>&1 && return
         sleep 0.5
@@ -57,6 +66,7 @@ ensure_redis() {
     echo "redis failed to start" >&2
     exit 1
 }
+
 
 seed_redis() {
     local port="${REDIS_PORT:-6379}"
